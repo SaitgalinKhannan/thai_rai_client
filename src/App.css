@@ -1,38 +1,141 @@
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap");
+
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
 }
 
 .App-link {
-  color: #61dafb;
+    color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.owner {
+    font-size: 15px
+}
+
+.carousel-images {
+    position: relative;
+    border-radius: 10px;
+    margin: auto;
+    max-width: 100vw;
+    max-height: 100vw;
+    overflow: hidden;
+}
+
+.carousel-images img {
+    width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+}
+
+.slide_direction {
+    display: flex;
+    justify-content: space-between;
+}
+
+.left,
+.right {
+    color: #fff;
+    padding: 3px 0 1px 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto 10px;
+    height: 25px;
+    width: 25px;
+}
+
+.left {
+    left: 0;
+}
+
+.right {
+    right: 0;
+}
+
+.leftIcon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 1;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 2px dashed #1475cf;
+    height: 150px;
+    width: 150px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.uploaded_image {
+    margin: 10px 0;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 20px;
+    border-radius: 5px;
+    background-color: #e9f0ff;
+}
+
+.image-container {
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.info-container {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.delete-icon {
+    align-self: center;
+}
+
+.divider:after,
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
 }
