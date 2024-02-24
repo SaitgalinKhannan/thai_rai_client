@@ -6,12 +6,14 @@ import {
     NumberInput, NumberInputField, NumberInputStepper,
     Select,
     Stack, Text,
-    Textarea
+    Textarea, ToastId, useToast
 } from "@chakra-ui/react";
-import React from "react";
-import {BuildingType, RealEstateDto, Status, statusMapping, user} from "../../data";
+import React, {useContext, useState} from "react";
+import {BuildingType, RealEstateDto, Status, statusMapping} from "../../api/model";
 import Uploader, {ImageInfo} from "../Images/Uploader";
-import axios from "axios";
+import {realEstateById, uploadNewHouse} from "../../api/Data";
+import {useNavigate} from "react-router-dom";
+import {ThaiRaiContext} from "../../context/HouseProvider";
 
 export default function NewHouseDetails() {
     let [name, setName] = React.useState('');
@@ -32,61 +34,110 @@ export default function NewHouseDetails() {
     let [index, setIndex] = React.useState('');
     let [houseNumber, setHouseNumber] = React.useState('');
     let [images, setImages] = React.useState<ImageInfo[]>([]);
+    let [isUploaded, setUploaded] = useState(false);
+    let [realEstateId, setRealEstateId] = useState<number | null>(null);
+    let [buttonText, setButtonText] = useState("Опубликовать");
+    let context = useContext(ThaiRaiContext);
+    let toast = useToast()
+    let toastIdRef = React.useRef<ToastId>()
+    let navigate = useNavigate();
 
     const handleImagesChange = (newImages: ImageInfo[]) => {
         setImages(newImages);  // Update images state
     };
 
     const publishButtonClick = async () => {
-        if (name.trim() === '' || status.trim() === '' || type.trim() === '' || region.trim() === '' || district.trim() === '' || regionInCity.trim() === '' || index.trim() === '' || houseNumber.trim() === '' || description.trim() === '') {
-            alert('Заполните все поля.');
-        } else {
-            let realEstate: RealEstateDto = {
-                owner: user,
-                name: name,
-                price: price,
-                status: status,
-                newBuilding: newBuilding,
-                type: type,
-                roomCount: roomCount,
-                area: area,
-                description: description,
-                constructionYear: constructionYear,
-                floor: floor,
-                numberOfFloors: numberOfFloors,
-                address: {
-                    country: "Тайланд",
-                    region: region,
-                    district: district,
-                    regionInCity: regionInCity,
-                    street: street,
-                    index: index,
-                    houseNumber: houseNumber
-                }
-            }
-
-            console.log(JSON.stringify(realEstate))
-
-            const formData = new FormData();
-            const jsonBlob = new Blob([JSON.stringify(realEstate)], { type: 'application/json' });
-
-            formData.append('realEstateDto', jsonBlob);
-            images.forEach((image) => {
-                formData.append("files", image.file)
-            })
-
-            axios.post('http://127.0.0.1:8080/realestates/create', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
-                .then(response => {
-                    console.log(response.data);
+        if (isUploaded && realEstateId != null) {
+            realEstateById(realEstateId)
+                .then(realEstate => {
+                    context.setHouses(Array.of(realEstate))
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            navigate(`/property-details/${realEstateId}`)
+            return
+        }
 
+        const userId = localStorage.getItem('userId')
+        if (userId === null) {
+            toast({
+                title: 'Авторизуйтесь!',
+                status: 'error',
+                duration: 500,
+                isClosable: true,
+                position: 'top'
+            })
+        } else {
+            if (name.trim() === '' || status.trim() === '' || type.trim() === '' || region.trim() === '' || district.trim() === '' || regionInCity.trim() === '' || index.trim() === '' || houseNumber.trim() === '' || description.trim() === '') {
+                toast({
+                    title: 'Заполните все поля!',
+                    status: 'error',
+                    duration: 500,
+                    isClosable: true,
+                    position: 'top'
+                })
+            } else {
+                let realEstate: RealEstateDto = {
+                    ownerId: parseInt(userId),
+                    name: name,
+                    price: price,
+                    status: status,
+                    newBuilding: newBuilding,
+                    type: type,
+                    roomCount: roomCount,
+                    area: area,
+                    description: description,
+                    constructionYear: constructionYear,
+                    floor: floor,
+                    numberOfFloors: numberOfFloors,
+                    address: {
+                        country: "Тайланд",
+                        region: region,
+                        district: district,
+                        regionInCity: regionInCity,
+                        street: street,
+                        index: index,
+                        houseNumber: houseNumber
+                    }
+                }
+
+                toastIdRef.current = toast({
+                    title: 'Загрузка.',
+                    description: "Загружаем данные на сервер.",
+                    status: 'loading',
+                    isClosable: true,
+                    position: 'top'
+                })
+
+                await uploadNewHouse(realEstate, images)
+                    .then(it => {
+                            if (toastIdRef.current) {
+                                toast.update(toastIdRef.current, {
+                                    title: 'Готово.',
+                                    description: "Объявление успешно загружено.",
+                                    status: 'success',
+                                    duration: 1000,
+                                    isClosable: true,
+                                    position: 'top'
+                                })
+                            }
+                            setUploaded(true)
+                            setRealEstateId(it)
+                            setButtonText("Перейти к объявлению")
+                        }
+                    ).catch(e => {
+                            if (toastIdRef.current) {
+                                toast.update(toastIdRef.current, {
+                                    title: 'Ошибка.',
+                                    description: "Не удалось загрузить данные.",
+                                    status: 'error',
+                                    duration: 1000,
+                                    isClosable: true,
+                                    position: 'top'
+                                })
+                            }
+                            console.log(e)
+                        }
+                    )
+            }
         }
     }
 
@@ -129,7 +180,7 @@ export default function NewHouseDetails() {
                         onChange={e => setType(e.target.value)}
                         background={"#fff"}
                     >
-                        {Object.values(BuildingType).map(name => <option value={name}>{name}</option>)}
+                        {Object.values(BuildingType).map(name => <option key={name} value={name}>{name}</option>)}
                     </Select>
                 </Box>
 
@@ -313,8 +364,9 @@ export default function NewHouseDetails() {
                 <Uploader onImagesChange={handleImagesChange} images={images}/>
             </Stack>
 
-            <Stack direction={{base: 'column', md: 'row'}} justifyContent="center" align={{md: 'center'}} my='24px'>
-                <Button width={{base: "100%", md: "300px"}} onClick={publishButtonClick}>Опубликовать</Button>
+            <Stack direction={{base: 'column', md: 'row'}} justifyContent="center" align={{md: 'center'}} my='24px' padding={"10px"}>
+                <Button width={{base: "100%", md: "300px"}}
+                        onClick={publishButtonClick}>{buttonText}</Button>
             </Stack>
         </>
     )

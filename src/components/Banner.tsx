@@ -1,5 +1,5 @@
 import {Box, Button, Heading, HStack, Image, Stack, Text, VStack} from "@chakra-ui/react";
-import {bannerData} from "../data";
+import {bannerData} from "../api/model";
 import {BiPlus} from "react-icons/bi";
 import Apartment1Lg from "../assets/images/apartments/a1lg.png";
 import Apartment6Lg from "../assets/images/apartments/a6lg.png";

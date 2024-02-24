@@ -1,6 +1,6 @@
 import {Divider, Flex, Heading, HStack, Image, Stack, Text, VStack} from "@chakra-ui/react";
 import {BiArea, BiBed} from "react-icons/bi";
-import {RealEstateInterface} from "../../data";
+import {RealEstateInterface} from "../../api/model";
 import {image} from "../../api/Data";
 import noImage from "../../assets/images/no-photo.png"
 

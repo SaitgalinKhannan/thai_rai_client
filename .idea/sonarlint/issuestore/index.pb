@@ -35,8 +35,6 @@ _
 /src/components/PropertyDetails/HouseDetails.tsx,6\5\65d2a20e280b0fd22808ad4eac26ebd9c9f03cf8
 X
 (src/components/Search/LocationFilter.tsx,1\1\11ce63847446c89e263781c9b0b8a6aab1f0bdd8
-<
-src/data.tsx,0\c\0c6a1a51b60fc71661c95d619c22dbca2ef15b67
 N
 src/routes/PropertyDetails.tsx,8\d\8d0b956d55d21b1659cf6bfe082ef15c0ae1494c
 U
@@ -51,8 +49,6 @@ U
 src/logo.svg,6\d\6d3a8cd532ece5b4ddbd4b3b6a678ba686d300bc
 F
 src/react-app-env.d.ts,4\a\4a7b99bdbee5792679d347b6474463bf5e14b66d
-<
-src/Data.tsx,8\9\89c09dea3691d906c4427da3add7652ad57780c4
 R
 "src/components/Houses/Carousel.tsx,6\f\6f8661a18419adb91e3ad4cad93219cfe3713569
 [
@@ -102,8 +98,6 @@ G.idea/sonarlint/issuestore/3/2/32c6a3fac55ad1c5618a76d4cb1a944e2a2b1582,f\5\f5
 w
 G.idea/sonarlint/issuestore/e/a/eaaa802c205ba21af0cbf843763745289cbf1ab9,9\e\9ead495ce1b463e8db98fc71336ad393b5af65c2
 
-Q.idea/sonarlint/securityhotspotstore/0/c/0c6a1a51b60fc71661c95d619c22dbca2ef15b67,7\c\7caa492dacbfd1520d8463f399936e70a3cacc6a
-
 Q.idea/sonarlint/securityhotspotstore/4/b/4b025f8569fcb6bee1123cde69933c7f19debc92,5\d\5ded285e7bd52bb122bb6749a62686f7d0175cc9
 
 Q.idea/sonarlint/securityhotspotstore/a/6/a61beebc02cde28567d856de02d299fc438c7827,b\e\be70adba99d7431adac39954493e8cda80566305
@@ -133,8 +127,6 @@ w
 G.idea/sonarlint/issuestore/c/5/c5d38a62d1faae90a2acaa34b79a7ef365c917e4,f\2\f251b37f2b19c7222930e4a1efd6c9217b4cd0ed
 \
 ,.idea/inspectionProfiles/Project_Default.xml,4\9\496a238a6afa168dbaf6efd37bb459331589579c
-
-Q.idea/sonarlint/securityhotspotstore/8/9/89c09dea3691d906c4427da3add7652ad57780c4,9\7\97cdb48e0e54b4c58d3453fab7732cfd7780aa95
 T
 $.idea/codeStyles/codeStyleConfig.xml,d\d\dd7b3350c29c49497756c7f32c69a3bed18b1cba
 R
@@ -153,8 +145,6 @@ Q.idea/sonarlint/securityhotspotstore/c/5/c5d38a62d1faae90a2acaa34b79a7ef365c917
 Q.idea/sonarlint/securityhotspotstore/1/8/18eb02e2ed8e79203c5ec4e0b4217df6449775a9,c\b\cb316882aa5daa054beb73ce4ceb45c3cb19d34f
 w
 G.idea/sonarlint/issuestore/a/a/aa7165aefcf8ee3d73539e99ab007daf1aa18d8d,c\0\c01d284acb429e213e1091456c4ec81c4ec8d9c2
-w
-G.idea/sonarlint/issuestore/8/9/89c09dea3691d906c4427da3add7652ad57780c4,1\c\1c8bd8a8e504b44a864bec8a77dcd69772d71aa2
 
 Q.idea/sonarlint/securityhotspotstore/a/a/aa7165aefcf8ee3d73539e99ab007daf1aa18d8d,d\3\d36d51c1950e29ced2d32c3f437ee2732823fa27
 
@@ -171,3 +161,15 @@ Q.idea/sonarlint/securityhotspotstore/8/d/8d0b956d55d21b1659cf6bfe082ef15c0ae149
 Q.idea/sonarlint/securityhotspotstore/1/2/12746cc5e826b7bba22bb9a01bbed6031e2ca20d,7\6\76ed3261433df3d59645438e5b9665a02950a35c
 w
 G.idea/sonarlint/issuestore/6/d/6d3a8cd532ece5b4ddbd4b3b6a678ba686d300bc,4\2\42c76c28010a6da6e9d28de3ef3fcf8cf3ad03d8
+@
+src/api/model.ts,a\6\a6a6154d6cdf9c545f73534dc10f3bbced081155
+V
+&src/components/Profile/UserProfile.tsx,b\8\b87d76a6e5b259f03f7be177e948783fc8c5b213
+V
+&src/components/Header/NewNavMobile.tsx,9\0\90ec47817ed6a27cb83d168a7c96342969bb12e9
+b
+2node_modules/@chakra-ui/layout/dist/container.d.ts,9\7\974aaefae29a68aa0bb0fb4aee029faf63857136
+b
+2node_modules/react-router/dist/lib/components.d.ts,9\8\9891260c77e501592134184403d00d0c3a5fac4b
+q
+Anode_modules/@mui/material/BottomNavigation/BottomNavigation.d.ts,d\b\db9b0b906d4d5d99edef30e6be2e605715dff464

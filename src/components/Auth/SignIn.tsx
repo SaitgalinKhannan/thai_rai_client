@@ -11,25 +11,111 @@ import {
     Box,
     Link,
     FormControl,
-    FormHelperText,
-    InputRightElement
+    InputRightElement, useToast, ToastId
 } from "@chakra-ui/react";
 import {FaUserAlt, FaLock} from "react-icons/fa";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
+import {authUser, userByEmail} from "../../api/Data";
+import {useNavigate} from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 
 const CFaUserAlt = chakra(FaUserAlt);
 const CFaLock = chakra(FaLock);
 
 const SignIn = () => {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
+    const toast = useToast()
+    const toastIdRef = React.useRef<ToastId>()
 
     const handleShowClick = () => setShowPassword(!showPassword);
+
+    const loginUser = async (email: string, password: string) => {
+        try {
+            const response = await authUser(email, password)
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            const decodedJwt = jwtDecode(response.accessToken);
+            if (decodedJwt.sub != null) {
+                await userByEmail(decodedJwt.sub, response.accessToken).then(user => {
+                    console.log(user)
+                    localStorage.setItem('userId', user.id.toString());
+                    localStorage.setItem('firstName', user.firstName);
+                    localStorage.setItem('lastName', user.lastName);
+                    localStorage.setItem('email', user.email);
+                    localStorage.setItem('phone', user.phone);
+                    localStorage.setItem('role', user.role);
+
+                    if (toastIdRef.current) {
+                        toast.update(toastIdRef.current, {
+                            title: 'Вход выполнен',
+                            status: 'success',
+                            duration: 1000,
+                            isClosable: true,
+                            position: 'top'
+                        })
+                    }
+                    navigate("/")
+                }).catch(e => {
+                    throw e
+                })
+            }
+        } catch (error) {
+            console.log(error)
+            if (toastIdRef.current) {
+                toast.update(toastIdRef.current, {
+                    title: 'Не удалось войти',
+                    description: "Неправильный логин или пароль",
+                    status: 'error',
+                    duration: 1000,
+                    isClosable: true,
+                    position: 'top'
+                })
+            }
+        }
+    };
+
+    const loginButtonHandle = async () => {
+        if (email.trim() === '') {
+            toast({
+                title: 'Введите логин!',
+                status: 'error',
+                duration: 500,
+                isClosable: true,
+                position: 'top'
+            })
+            return;
+        }
+
+        if (password.trim() === '') {
+            toast({
+                title: 'Введите пароль!',
+                status: 'error',
+                duration: 500,
+                isClosable: true,
+                position: 'top'
+            })
+            return;
+        }
+
+        toastIdRef.current = toast({
+            title: 'Загрузка',
+            status: 'loading',
+            isClosable: true,
+            position: 'top'
+        })
+
+        await loginUser(email, password);
+    }
+
 
     return (
         <Flex
             flexDirection="column"
             width="100wh"
-            height="100vh"
+            height="85vh"
             justifyContent="center"
             alignItems="center"
         >
@@ -39,7 +125,6 @@ const SignIn = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Heading color="telegram.500">Thai Rai</Heading>
                 <Box minW={{base: "90%", md: "468px"}}>
                     <form>
                         <Stack
@@ -55,7 +140,11 @@ const SignIn = () => {
                                     >
                                         <CFaUserAlt color="telegram.500"/>
                                     </InputLeftElement>
-                                    <Input type="email" placeholder="Email"/>
+                                    <Input type="email"
+                                           placeholder="Email"
+                                           value={email}
+                                           onChange={it => setEmail(it.target.value)}
+                                    />
                                 </InputGroup>
                             </FormControl>
                             <FormControl>
@@ -67,6 +156,8 @@ const SignIn = () => {
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Пароль"
+                                        value={password}
+                                        onChange={it => setPassword(it.target.value)}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" onClick={handleShowClick}>
@@ -74,11 +165,11 @@ const SignIn = () => {
                                         </Button>
                                     </InputRightElement>
                                 </InputGroup>
-                                <FormHelperText textAlign="right">
+                                {/*<FormHelperText textAlign="right">
                                     <Link>Забыли пароль?</Link>
-                                </FormHelperText>
+                                </FormHelperText>*/}
                             </FormControl>
-                            <Button>Войти</Button>
+                            <Button onClick={loginButtonHandle}>Войти</Button>
                         </Stack>
                     </form>
                 </Box>

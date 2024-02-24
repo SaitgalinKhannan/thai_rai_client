@@ -1,5 +1,5 @@
 import {FC, useState} from "react";
-import {Photo} from "../../data";
+import {Photo} from "../../api/model";
 import {HStack, Image} from "@chakra-ui/react";
 import {ArrowLeftIcon, ArrowRightIcon} from "@chakra-ui/icons";
 import {image} from "../../api/Data";

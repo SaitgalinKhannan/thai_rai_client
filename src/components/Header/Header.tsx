@@ -1,8 +1,8 @@
 import {Button, ButtonGroup, chakra, Flex, Heading, HStack, useBreakpointValue} from "@chakra-ui/react";
 import {Link, useNavigate} from "react-router-dom";
-import NavMobile from "./NavMobile";
-import {useContext} from "react";
+import React, {useContext} from "react";
 import {ThaiRaiContext} from "../../context/HouseProvider";
+import {Role} from "../../api/model";
 
 export default function Header() {
     const isDesktop = useBreakpointValue({base: false, lg: true})
@@ -17,10 +17,18 @@ export default function Header() {
         navigate("/login/signin")
     }
 
+    const profileHandleClick = () => {
+        navigate("/profile")
+    }
+
     const toMainPage = () => {
         resetFilter()
         navigate("/")
     }
+
+    let lastName = localStorage.getItem('lastName')
+    let firstName = localStorage.getItem('firstName')
+    let bio = `${firstName} ${lastName}`
 
     return (
         <chakra.header id="header" borderBottom='1px solid rgb(0,0,0,0.3)'>
@@ -37,17 +45,26 @@ export default function Header() {
                             </ButtonGroup>
 
                             <HStack>
-                                <Button size='sm' variant='solid' onClick={addHouseHandleClick}>Добавить
-                                    объявление</Button>
-                                <Button size='sm' variant='outline' onClick={loginHandleClick}>Вход</Button>
+                                {
+                                    localStorage.getItem('accessToken') && localStorage.getItem('role') === Role.ADMIN ? (
+                                        <>
+                                            <Button size='sm' variant='outline' onClick={profileHandleClick}>{bio}</Button>
+                                            <Button size='sm' variant='solid' onClick={addHouseHandleClick}>Добавить объявление</Button>
+                                        </>
+                                    ) : localStorage.getItem('accessToken') ? (
+                                        <Button size='sm' variant='outline' onClick={profileHandleClick}>{bio}</Button>
+                                    ) : (
+                                        <Button size='sm' variant='outline' onClick={loginHandleClick}>Вход</Button>
+                                    )
+                                }
                             </HStack>
+
                         </>
                     ) : (
-                        <NavMobile/>
+                        <></>
                     )
                 }
             </Flex>
-            {/* <Divider color='telegram.800' w={}='20px' />  */}
         </chakra.header>
     )
 }

@@ -1,9 +1,12 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import RealEstateContext from "../data";
-import {housesList} from "../api/Data";
+import React, {useEffect, useMemo, useState} from "react";
+import RealEstateContext from "../api/model";
+import {housesList, userByEmail} from "../api/Data";
+import {jwtDecode} from "jwt-decode";
 
 const realEstateContext: RealEstateContext = {
     realEstates: [],
+    setHouses() {
+    },
     city: '',
     setCity() {
     },
@@ -41,30 +44,47 @@ export default function HouseProvider({children}: Readonly<{
     const limit = 20;
 
     const fetchData = async () => {
-        try {
-            const data = await housesList({
-                limit: limit,
-                offset: offset * limit
-            });
-            setHouses([...houses, ...data])
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
+        await housesList({
+            limit: limit,
+            offset: offset * limit
+        }).then(data => {
+            setHouses(data)
+        }).catch(e => {
+            console.error('Error fetching data:', e);
+        })
     };
+
+    const reauthUser = async () => {
+        const token = localStorage.getItem('accessToken')
+        if (token != null && jwtDecode(token).sub != null) {
+            const sub = jwtDecode(token).sub!!
+            await userByEmail(sub, token)
+                .then(user => {
+                    localStorage.setItem('userId', user.id.toString());
+                    localStorage.setItem('firstName', user.firstName);
+                    localStorage.setItem('lastName', user.lastName);
+                    localStorage.setItem('email', user.email);
+                    localStorage.setItem('phone', user.phone);
+                    localStorage.setItem('role', user.role);
+                })
+                .catch(e => {
+                    console.error('Error reauth user:', e);
+                })
+        }
+    }
 
     useEffect(() => {
         fetchData();
-    }, [offset]);
+        reauthUser();
+    }, []);
 
     useEffect(() => {
         const allCities = houses.map(house => house.address.region);
-        const uniqueCities = Array.from(new Set(allCities));
+        const uniqueCities = [...new Set(allCities)];
         setCities(uniqueCities);
-    }, [houses]);
 
-    useEffect(() => {
         const allPropertyTypes = houses.map(house => house.type)
-        const uniquePropertyTypes = Array.from(new Set(allPropertyTypes));
+        const uniquePropertyTypes = [...new Set(allPropertyTypes)];
         setProperties(uniquePropertyTypes);
     }, [houses]);
 
@@ -93,7 +113,6 @@ export default function HouseProvider({children}: Readonly<{
         }, 1000);
     }
 
-
     const resetFilter = async () => {
         setHouses([])
         setOffset(0)
@@ -102,6 +121,7 @@ export default function HouseProvider({children}: Readonly<{
 
     const obj: RealEstateContext = useMemo(() => ({
         realEstates: houses,
+        setHouses: setHouses,
         city: city,
         setCity: setCity,
         price: price,

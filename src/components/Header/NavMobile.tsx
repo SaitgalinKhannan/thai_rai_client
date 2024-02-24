@@ -12,6 +12,7 @@ import {FiMenu} from "react-icons/fi";
 import {useContext, useRef} from 'react';
 import {useNavigate} from "react-router-dom";
 import {ThaiRaiContext} from "../../context/HouseProvider";
+import {Role} from "../../api/model";
 
 
 export default function NavMobile() {
@@ -26,6 +27,10 @@ export default function NavMobile() {
 
     const loginHandleClick = () => {
         navigate("/login/signin")
+    }
+
+    const profileHandleClick = () => {
+        navigate("/profile")
     }
 
     const toMainPage = () => {
@@ -51,9 +56,18 @@ export default function NavMobile() {
                         <VStack as='nav' spacing='8' alignItems='left'>
                             <Button size='sm' variant='solid' onClick={toMainPage}>Главная страница</Button>
                             <Button size='sm' variant='solid'>О нас</Button>
-                            <Button size='sm' variant='solid' onClick={addHouseHandleClick}>Добавить
-                                объявление</Button>
-                            <Button size='sm' variant='outline' onClick={loginHandleClick}>Вход</Button>
+                            {
+                                localStorage.getItem('accessToken') && localStorage.getItem('role') === Role.ADMIN ? (
+                                    <>
+                                        <Button size='sm' variant='solid' onClick={addHouseHandleClick}>Добавить объявление</Button>
+                                        <Button size='sm' variant='outline' onClick={profileHandleClick}>Профиль</Button>
+                                    </>
+                                ) : localStorage.getItem('accessToken') ? (
+                                    <Button size='sm' variant='outline' onClick={profileHandleClick}>Профиль</Button>
+                                ) : (
+                                    <Button size='sm' variant='outline' onClick={loginHandleClick}>Вход</Button>
+                                )
+                            }
                         </VStack>
                     </DrawerBody>
                 </DrawerContent>

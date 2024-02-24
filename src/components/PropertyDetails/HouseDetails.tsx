@@ -1,12 +1,12 @@
 import {useParams} from "react-router-dom";
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Box, Heading, HStack, Stack, Text, VStack} from "@chakra-ui/react";
 import {BiArea, BiBed} from "react-icons/bi";
 import Form from "./Form";
 import {ThaiRaiContext} from "../../context/HouseProvider";
-import {RealEstateInterface} from "../../data";
+import {RealEstateInterface, UserWithoutPassword} from "../../api/model";
 import Carousel from "../Houses/Carousel";
-
+import {userById} from "../../api/Data";
 
 export default function HouseDetails() {
     const {propertyId} = useParams();
@@ -14,6 +14,21 @@ export default function HouseDetails() {
     const thaiRaiContext = useContext(ThaiRaiContext);
     const houses: RealEstateInterface[] = thaiRaiContext.realEstates;
     const searchedHouse: RealEstateInterface | undefined = houses.find(value => value.id === parseInt(myPropertyId));
+    const [owner, setOwner] = useState<UserWithoutPassword | null>(null)
+
+    async function ownerUpload() {
+        if (searchedHouse != null) {
+            userById(searchedHouse?.ownerId)
+                .then(user => setOwner(user))
+                .catch(e => {
+                    console.log(`Не удалось загрузить данные владельца. ${e}`);
+                });
+        }
+    }
+
+    useEffect(() => {
+        ownerUpload()
+    }, [searchedHouse]);
 
     return (
         <>
@@ -56,12 +71,12 @@ export default function HouseDetails() {
                             <Text fontSize='24px'>{searchedHouse.description}</Text>
                         </VStack>
 
-                        <Form searchedHouse={searchedHouse}/>
+                        <Form owner={owner}/>
                     </Stack>
                 </>
 
             ) : (
-                <Text fontSize="18px" color="telegram.500">Упс, ошибка: Не удалось найти информацию о доме.</Text>
+                <Text fontSize="18px" color="telegram.500">Загрузка...</Text>
             )
             }
         </>
