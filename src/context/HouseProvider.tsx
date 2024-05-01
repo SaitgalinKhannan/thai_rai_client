@@ -1,58 +1,72 @@
-import React, {useEffect, useMemo, useState} from "react";
-import RealEstateContext from "../api/model";
-import {housesList, userByEmail} from "../api/Data";
+import React, {createContext, useEffect, useMemo, useState} from "react";
+import RealEstateContext, {Filter, RealEstateInterface} from "../api/model";
+import {authUser, favoritesHousesList, housesList, userByEmail} from "../api/Data";
 import {jwtDecode} from "jwt-decode";
 
 const realEstateContext: RealEstateContext = {
     realEstates: [],
     setHouses() {
     },
-    city: '',
-    setCity() {
-    },
-    price: '',
-    setPrice() {
-    },
-    property: '',
-    setProperty() {
-    },
-    cities: [],
-    properties: [],
+    filterProps: null,
     isLoading: false,
-    searchHandler: () => {
+    setIsLoading() {
     },
-    resetFilter: () => {
+    resetFilter() {
     },
     offset: 0,
     setOffset() {
+    },
+    filter: null,
+    setFilter() {
     }
 };
 
-export const ThaiRaiContext = React.createContext<RealEstateContext>(realEstateContext);
+export const ThaiRaiContext = createContext<RealEstateContext>(realEstateContext);
 
 export default function HouseProvider({children}: Readonly<{
     children: React.ReactNode
 }>): React.ReactElement<RealEstateContext> {
-    const [houses, setHouses] = useState(realEstateContext.realEstates);
-    const [city, setCity] = useState('Select City');
-    const [price, setPrice] = useState('Select Price');
-    const [property, setProperty] = useState('Select type');
-    const [isLoading, setIsLoading] = useState(false);
-    const [cities, setCities] = useState<string[]>([]);
-    const [properties, setProperties] = useState<string[]>([]);
+    const [houses, setHouses] = useState<RealEstateInterface[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [offset, setOffset] = useState(0);
     const limit = 20;
+    const [filter, setFilter] = useState<Filter | null>(null)
 
     const fetchData = async () => {
+        setIsLoading(true);
         await housesList({
             limit: limit,
             offset: offset * limit
-        }).then(data => {
+        }, null).then(data => {
             setHouses(data)
         }).catch(e => {
             console.error('Error fetching data:', e);
         })
+        setIsLoading(false);
     };
+
+    useEffect(() => {
+        housesList({
+            limit: limit,
+            offset: offset * limit
+        }, null).then(data => {
+            setHouses(data)
+        }).catch(e => {
+            console.error('Error fetching data:', e);
+        })
+    }, [offset]);
+
+    useEffect(() => {
+        setOffset(0)
+        housesList({
+            limit: limit,
+            offset: offset * limit
+        }, filter).then(data => {
+            setHouses(data)
+        }).catch(e => {
+            console.error('Error fetching data:', e);
+        })
+    }, [filter]);
 
     const reauthUser = async () => {
         const token = localStorage.getItem('accessToken')
@@ -69,6 +83,19 @@ export default function HouseProvider({children}: Readonly<{
                 })
                 .catch(e => {
                     console.error('Error reauth user:', e);
+                    const email = localStorage.getItem('email');
+                    const password = localStorage.getItem('password');
+                    if (email != null && password != null) {
+                        authUser(email, password)
+                            .then(tokens => {
+                                localStorage.setItem('accessToken', tokens.accessToken);
+                                localStorage.setItem('refreshToken', tokens.refreshToken);
+                            })
+                            .catch(e => {
+                                console.error('Error auth user:', e);
+                                localStorage.clear();
+                            })
+                    }
                 })
         }
     }
@@ -77,41 +104,6 @@ export default function HouseProvider({children}: Readonly<{
         fetchData();
         reauthUser();
     }, []);
-
-    useEffect(() => {
-        const allCities = houses.map(house => house.address.region);
-        const uniqueCities = [...new Set(allCities)];
-        setCities(uniqueCities);
-
-        const allPropertyTypes = houses.map(house => house.type)
-        const uniquePropertyTypes = [...new Set(allPropertyTypes)];
-        setProperties(uniquePropertyTypes);
-    }, [houses]);
-
-    function searchHandler() {
-        setIsLoading(true);
-
-        const isDefault = (str: string) => {
-            return str.split(' ').includes('Select');
-        };
-
-        const minPrice = parseInt(price.split(' ')[0]);
-        const maxPrice = parseInt(price.split('- ')[1]);
-
-        const filteredHouses = houses.filter((house) => {
-            const housePrice = house.price;
-
-            return (isDefault(city) || house.address.region === city) &&
-                (isDefault(price) ||
-                    (housePrice >= minPrice && housePrice <= maxPrice)) &&
-                (isDefault(property) || house.type === property);
-        });
-
-        setTimeout(() => {
-            setHouses(filteredHouses);
-            setIsLoading(false);
-        }, 1000);
-    }
 
     const resetFilter = async () => {
         setHouses([])
@@ -122,20 +114,15 @@ export default function HouseProvider({children}: Readonly<{
     const obj: RealEstateContext = useMemo(() => ({
         realEstates: houses,
         setHouses: setHouses,
-        city: city,
-        setCity: setCity,
-        price: price,
-        setPrice: setPrice,
-        property: property,
-        setProperty: setProperty,
-        cities: cities,
-        properties: properties,
+        filterProps: null,
         isLoading: isLoading,
-        searchHandler: searchHandler,
+        setIsLoading: setIsLoading,
         resetFilter: resetFilter,
         offset: offset,
-        setOffset: setOffset
-    }), [houses, city, setCity, price, setPrice, property, setProperty, cities, properties, isLoading, searchHandler]);
+        setOffset: setOffset,
+        filter: filter,
+        setFilter: setFilter,
+    }), [houses, isLoading]);
 
     return (
         <ThaiRaiContext.Provider value={obj}>

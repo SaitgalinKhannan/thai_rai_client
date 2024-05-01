@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {
     Flex,
-    Heading,
     Input,
     Button,
     InputGroup,
@@ -11,7 +10,7 @@ import {
     Box,
     Link,
     FormControl,
-    InputRightElement, useToast, ToastId
+    InputRightElement, useToast, ToastId, HStack, Text
 } from "@chakra-ui/react";
 import {FaUserAlt, FaLock} from "react-icons/fa";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
@@ -40,11 +39,11 @@ const SignIn = () => {
             const decodedJwt = jwtDecode(response.accessToken);
             if (decodedJwt.sub != null) {
                 await userByEmail(decodedJwt.sub, response.accessToken).then(user => {
-                    console.log(user)
                     localStorage.setItem('userId', user.id.toString());
                     localStorage.setItem('firstName', user.firstName);
                     localStorage.setItem('lastName', user.lastName);
                     localStorage.setItem('email', user.email);
+                    localStorage.setItem('password', password);
                     localStorage.setItem('phone', user.phone);
                     localStorage.setItem('role', user.role);
 
@@ -125,7 +124,7 @@ const SignIn = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Box minW={{base: "90%", md: "468px"}}>
+                <Box minW={{base: "90%", lg: "468px"}}>
                     <form>
                         <Stack
                             spacing={4}
@@ -138,7 +137,7 @@ const SignIn = () => {
                                     <InputLeftElement
                                         pointerEvents="none"
                                     >
-                                        <CFaUserAlt color="telegram.500"/>
+                                        <CFaUserAlt color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input type="email"
                                            placeholder="Email"
@@ -151,7 +150,7 @@ const SignIn = () => {
                                 <InputGroup>
                                     <InputLeftElement
                                         pointerEvents="none">
-                                        <CFaLock color="telegram.500"/>
+                                        <CFaLock color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
@@ -160,7 +159,12 @@ const SignIn = () => {
                                         onChange={it => setPassword(it.target.value)}
                                     />
                                     <InputRightElement width="4.5rem">
-                                        <Button h="1.75rem" onClick={handleShowClick}>
+                                        <Button
+                                            h="1.75rem"
+                                            backgroundColor={"#2d9d92"}
+                                            onClick={handleShowClick}
+                                            _hover={{background: "#9cb1b1"}}
+                                        >
                                             {showPassword ? <ViewOffIcon/> : <ViewIcon/>}
                                         </Button>
                                     </InputRightElement>
@@ -169,17 +173,27 @@ const SignIn = () => {
                                     <Link>Забыли пароль?</Link>
                                 </FormHelperText>*/}
                             </FormControl>
-                            <Button onClick={loginButtonHandle}>Войти</Button>
+                            <Button
+                                backgroundColor={"#2d9d92"}
+                                onClick={loginButtonHandle}
+                                _hover={{background: "#9cb1b1"}}
+                            >
+                                Войти
+                            </Button>
                         </Stack>
                     </form>
                 </Box>
             </Stack>
-            <Box>
-                Нет аккаунта?{" "}
-                <Link color="telegram.500" href="/login/signup">
+            <HStack spacing={0}>
+                <Text>Нет аккаунта?{" "}</Text>
+                <Button
+                    variant={"text"}
+                    color={"#2d9d92"}
+                    onClick={() => navigate("/new-account")}
+                >
                     Регистрация
-                </Link>
-            </Box>
+                </Button>
+            </HStack>
         </Flex>
     );
 };

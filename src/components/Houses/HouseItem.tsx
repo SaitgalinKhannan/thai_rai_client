@@ -9,35 +9,35 @@ export default function HouseItem({house}: Readonly<{ house: RealEstateInterface
         <Flex justify='center' align='center'>
             <Stack justify='center' width="350px" bg="white" boxShadow="xl" borderRadius="xl">
                 <Image src={house.photos.length > 0 ? image(house.photos[0].id) : noImage} h='170' alt='houses'
-                       borderTopRadius="xl" objectFit="contain"/>
+                       borderTopRadius="xl" objectFit="cover"/>
 
                 <VStack p='4' align='left'>
-                    <Text mt="-1" fontWeight="extrabold" fontSize="18px" color="telegram.500">
-                        {house.price}
-                        <span style={{fontSize: 12, color: "grey", fontWeight: "normal"}}>
-                            / месяц
+                    <Text mt="-1" fontWeight="extrabold" fontSize="18px" color={"#2d9d92"}>
+                        {house.price}{" "}
+                        <span style={{fontSize: 14, color: "grey", fontWeight: "normal"}}>
+                            / THB
                         </span>
                     </Text>
 
-                    <Heading fontSize="24px" letterSpacing="tight" height="50px">
+                    <Heading fontSize="24px" letterSpacing="tight" overflow={"hidden"}>
                         {house.name}
                     </Heading>
 
-                    <Text fontSize="13px" color="grey">
-                        {house.address.regionInCity}
+                    <Text fontSize="16px" color="grey">
+                        {house.addressDto.regionInCity}
                     </Text>
 
-                    <Divider my="2.5"/>
+                    <Divider my="1"/>
 
                     <HStack spacing="5">
                         <HStack>
-                            <BiBed style={{color: "#D53F8C"}}/>
+                            <BiBed style={{color: "#2d9d92"}}/>
                             <Text
                                 fontSize="12px">{house.roomCount} {house.roomCount === 1 ? "Комната" : "Комнат"}</Text>
                         </HStack>
 
                         <HStack>
-                            <BiArea style={{color: "#D53F8C"}}/>
+                            <BiArea style={{color: "#2d9d92"}}/>
                             <Text fontSize="12px">{house.area} кв/м</Text>
                         </HStack>
                     </HStack>

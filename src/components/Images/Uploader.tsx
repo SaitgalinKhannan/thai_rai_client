@@ -4,8 +4,10 @@ import {MdCloudUpload, MdDelete} from 'react-icons/md';
 import {Image, SimpleGrid} from "@chakra-ui/react";
 
 export type ImageInfo = {
+    id: number,
     file: File;
     url: string;
+    isOld: boolean
 };
 
 type UploaderProps = {
@@ -13,9 +15,8 @@ type UploaderProps = {
     images: ImageInfo[];
 };
 
-function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>) {
-    const [images, setImages] = useState<ImageInfo[]>([]);
-    const [fileNames, setFileNames] = useState<string[]>([]);
+function Uploader({onImagesChange: onImagesChange, images: propImages}: Readonly<UploaderProps>) {
+    const [images, setImages] = useState<ImageInfo[]>(propImages);
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -24,12 +25,13 @@ function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>)
             const fileList = Array.from(files);
 
             const newImages = fileList.map((file) => ({
-                file,
-                url: URL.createObjectURL(file)
+                id: 0,
+                file: file,
+                url: URL.createObjectURL(file),
+                isOld: false
             }));
 
             setImages((prevImages) => [...prevImages, ...newImages]);
-            setFileNames((prevFileNames) => [...prevFileNames, ...fileList.map((file) => file.name)]);
             onImagesChange([...images, ...newImages]);
         }
     };
@@ -40,12 +42,6 @@ function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>)
             const newImages = [...prevImages];
             newImages.splice(index, 1);
             return newImages;
-        });
-
-        setFileNames((prevFileNames) => {
-            const newFileNames = [...prevFileNames];
-            newFileNames.splice(index, 1);
-            return newFileNames;
         });
     };
 
@@ -67,11 +63,9 @@ function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>)
                     hidden
                     onChange={handleFileChange}
                 />
-
-                <MdCloudUpload color="#1475cf" size={60}/>
+                <MdCloudUpload color={"#2d9d92"} size={60}/>
                 <p>Browse Files to upload</p>
             </div>
-
 
             <SimpleGrid width={"100%"} minChildWidth='250px' spacing='10px'>
                 {images.map((image, index) => (
@@ -84,7 +78,6 @@ function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>)
                             />
                         </div>
                         <div className="info-container">
-                            {fileNames[index]}
                             <div className="delete-icon">
                                     <MdDelete onClick={() => handleDeleteClick(index)}/>
                             </div>

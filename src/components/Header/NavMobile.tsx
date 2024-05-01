@@ -26,7 +26,7 @@ export default function NavMobile() {
     }
 
     const loginHandleClick = () => {
-        navigate("/login/signin")
+        navigate("/signin")
     }
 
     const profileHandleClick = () => {

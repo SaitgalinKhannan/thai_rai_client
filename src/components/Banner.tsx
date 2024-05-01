@@ -9,14 +9,14 @@ export default function Banner() {
         <Stack direction="row" my='6' overflow='hidden'>
             <VStack
                 flexGrow='1'
-                px={{sm: "6", md: "10"}}
-                py={{sm: '8', md: "16"}}
+                px={{sm: "6", lg: "10"}}
+                py={{sm: '8', lg: "16"}}
                 bg="telegram.100"
                 justify="center"
                 align="left"
                 borderRadius="xl"
             >
-                <Heading fontSize={{base: "xl", sm: "2xl", md: "3xl"}}>
+                <Heading fontSize={{base: "xl", sm: "2xl", lg: "3xl"}}>
                     Find Real Estate That Suits You.
                 </Heading>
                 <Text fontSize="sm">
@@ -34,17 +34,17 @@ export default function Banner() {
                             key={index}
                             bg="telegram.200"
                             p="4"
-                            borderRadius="md"
+                            borderRadius="lg"
                             align="left"
                             pr="3"
                         >
                             <HStack>
-                                <Text fontSize={{sm: '14px', md: 'md'}} fontWeight="extrabold" mr="-2">
+                                <Text fontSize={{sm: '14px', lg: 'lg'}} fontWeight="extrabold" mr="-2">
                                     {Object.keys(item)}
                                 </Text>{" "}
                                 <BiPlus style={{color: "#ED64A6"}}/>
                             </HStack>
-                            <Text fontSize={{sm: '12px', md: 'sm'}}>{Object.values(item)}</Text>
+                            <Text fontSize={{sm: '12px', lg: 'sm'}}>{Object.values(item)}</Text>
                         </VStack>
                     ))}
                 </HStack>

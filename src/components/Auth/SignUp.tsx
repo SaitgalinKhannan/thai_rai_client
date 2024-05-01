@@ -1,29 +1,22 @@
 import React, {useState} from "react";
 import {
-    Box,
-    Button,
-    chakra,
     Flex,
-    FormControl,
-    Heading,
     Input,
+    Button,
     InputGroup,
-    InputLeftElement,
-    InputRightElement,
     Stack,
-    ToastId,
-    useToast
+    InputLeftElement,
+    Box,
+    FormControl,
+    InputRightElement, useToast, ToastId
 } from "@chakra-ui/react";
-import {FaLock, FaUserAlt} from "react-icons/fa";
+import {FaUserAlt, FaLock} from "react-icons/fa";
 import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import {authUser, registerUser} from "../../api/Data";
-import {Role, UserDto} from "../../api/model";
 import {useNavigate} from "react-router-dom";
+import {Role, UserDto} from "../../api/model";
 
-const CFaUserAlt = chakra(FaUserAlt);
-const CFaLock = chakra(FaLock);
-
-const SignUp = () => {
+export default function SignUp() {
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
@@ -144,7 +137,7 @@ const SignUp = () => {
                     localStorage.setItem('phone', user.phone);
                     localStorage.setItem('role', user.role);
                     if (user.photoUrl != null) {
-                        localStorage.setItem('photoUrl',  user.photoUrl)
+                        localStorage.setItem('photoUrl', user.photoUrl)
                     }
 
                     if (toastIdRef.current) {
@@ -190,7 +183,7 @@ const SignUp = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Box minW={{base: "90%", md: "468px"}}>
+                <Box minW={{base: "90%", lg: "468px"}}>
                     <form>
                         <Stack
                             spacing={4}
@@ -201,7 +194,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaUserAlt color="telegram.500"/>
+                                        <FaUserAlt color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type="lastname"
@@ -216,7 +209,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaUserAlt color="telegram.500"/>
+                                        <FaUserAlt color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type="firstname"
@@ -231,7 +224,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaUserAlt color="telegram.500"/>
+                                        <FaUserAlt color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type="email"
@@ -246,7 +239,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaUserAlt color="telegram.500"/>
+                                        <FaUserAlt color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type="phone"
@@ -261,7 +254,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaLock color="telegram.500"/>
+                                        <FaLock color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
@@ -272,7 +265,12 @@ const SignUp = () => {
                                         }}
                                     />
                                     <InputRightElement width="4.5rem">
-                                        <Button h="1.75rem" onClick={handleShowClick}>
+                                        <Button
+                                            h="1.75rem"
+                                            onClick={handleShowClick}
+                                            backgroundColor={"#2d9d92"}
+                                            _hover={{background: "#9cb1b1"}}
+                                        >
                                             {showPassword ? <ViewOffIcon/> : <ViewIcon/>}
                                         </Button>
                                     </InputRightElement>
@@ -281,7 +279,7 @@ const SignUp = () => {
                             <FormControl>
                                 <InputGroup>
                                     <InputLeftElement pointerEvents="none">
-                                        <CFaLock color="telegram.500"/>
+                                        <FaLock color="#2d9d92"/>
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
@@ -292,13 +290,24 @@ const SignUp = () => {
                                         }}
                                     />
                                     <InputRightElement width="4.5rem">
-                                        <Button h="1.75rem" onClick={handleShowClick}>
+                                        <Button
+                                            h="1.75rem"
+                                            onClick={handleShowClick}
+                                            backgroundColor={"#2d9d92"}
+                                            _hover={{background: "#9cb1b1"}}
+                                        >
                                             {showPassword ? <ViewOffIcon/> : <ViewIcon/>}
                                         </Button>
                                     </InputRightElement>
                                 </InputGroup>
                             </FormControl>
-                            <Button onClick={signUpHandleClick}>Зарегистрироваться</Button>
+                            <Button
+                                backgroundColor={"#2d9d92"}
+                                onClick={signUpHandleClick}
+                                _hover={{background: "#9cb1b1"}}
+                            >
+                                Зарегистрироваться
+                            </Button>
                         </Stack>
                     </form>
                 </Box>
@@ -306,5 +315,3 @@ const SignUp = () => {
         </Flex>
     );
 };
-
-export default SignUp;

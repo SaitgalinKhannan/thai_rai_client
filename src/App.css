@@ -99,7 +99,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    border: 2px dashed #1475cf;
+    border: 2px dashed #2d9d92;
     height: 150px;
     width: 150px;
     cursor: pointer;
@@ -139,3 +139,79 @@
     height: 1px;
     background: #eee;
 }
+
+.submitButton {
+    margin: 0;
+    font-weight: normal;
+    box-sizing: border-box;
+    line-height: 1.5;
+    font-size: 16px;
+    align-self: center;
+    vertical-align: middle;
+    display: inline;
+    box-shadow: rgba(9, 94, 144, 0.2) 0 4px 12px, rgba(0, 122, 191, 0.1) 0 2px 3px;
+}
+
+.image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+/* Styles for the fullscreen overlay */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.fullscreen-image img {
+    height: 100vh;
+    object-fit: cover;
+}
+
+@media screen and (max-width: 767px) {
+    .fullscreen-image img {
+        width: 100vw;
+        height: auto;
+        object-fit: contain;
+    }
+}
+
+.button_carousel {
+    display: grid;
+    margin-top: 12px;
+    grid-gap: 4px;
+    grid-template-columns: repeat(5, [col] 100px);
+    grid-template-rows: repeat(1, [row] 80px);
+}
+
+/*.green_icon {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) grayscale(100%) brightness(0) invert(100%) sepia(100%) saturate(10000%) hue-rotate(-180deg);
+}*/
+
+.bluredImage {
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: #ccc;
+}
+

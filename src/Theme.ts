@@ -1,4 +1,5 @@
 import { extendTheme, theme as base } from "@chakra-ui/react"
+import {createTheme} from "@mui/material";
 
 export const breakpoints = {
     sm: '320px',
@@ -27,22 +28,44 @@ export const theme = extendTheme({
                 colorScheme: 'telegram',
             }
         },
+        NumberInput:{
+            defaultProps: {
+                focusBorderColor: '#2d9d92'
+            }
+        },
         Input:{
             defaultProps: {
-                focusBorderColor: 'telegram.500'
+                focusBorderColor: '#2d9d92'
             }
         },
         Select:{
             baseStyle: {
                 _focus: {
-                    borderColor: 'telegram.500'
+                    borderColor: "#2d9d92"
                 }
             }
         },
         Textarea:{
             defaultProps: {
-                focusBorderColor: 'telegram.500'
+                focusBorderColor: '#2d9d92'
             }
         }
     }
+});
+
+export const muiTheme = createTheme({
+    palette: {
+        primary: {
+            main: '#2d9d92',
+            light: '#7aa8a4',
+            dark: '#289085',
+            contrastText: '#242105'
+        },
+        secondary: {
+            main: '#8bc1bc',
+            light: '#7aa8a4',
+            dark: '#289085',
+            contrastText: '#242105'
+        }
+    },
 });
