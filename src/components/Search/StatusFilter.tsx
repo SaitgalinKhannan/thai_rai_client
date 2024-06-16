@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useState} from "react";
-import {ThaiRaiContext} from "../../context/HouseProvider";
 import {Select} from "@chakra-ui/react";
 import {StatusForUsers, statusForUsersMapping} from "../../api/model";
 import {SearchContext} from "../../context/SearchProvider";

@@ -6,8 +6,10 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useToast} from "@chakra-ui/react";
 import {isMobileScreen} from "../../App";
 import {getChatRooms} from "../../api/Data";
+import {useTranslation} from "react-i18next";
 
 export default function MobileChatRooms() {
+    const {t} = useTranslation();
     const {chatId} = useParams();
     const {chatRooms, chatRoom, setChatRoom, setChatRooms, setChatMessages} = useContext(ChatContext);
     const [userId, setUserId] = useState<number | null>(null)
@@ -51,7 +53,7 @@ export default function MobileChatRooms() {
                 }).catch(e => console.error(e));
         } else {
             toast({
-                title: 'Авторизуйтесь!',
+                title: t('log_in'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -105,7 +107,7 @@ export default function MobileChatRooms() {
                         {chatRooms.map((chat, index) => (
                             <div key={index}>
                                 <ListItem component="div" disablePadding
-                                          sx={{backgroundColor: chatRoom?.id === chat.id ? bgColor: defaultColor}}>
+                                          sx={{backgroundColor: chatRoom?.id === chat.id ? bgColor : defaultColor}}>
                                     <ListItemButton onClick={e => toChat(chat)}>
                                         <ChatRoom
                                             chatRoom={{
@@ -114,8 +116,8 @@ export default function MobileChatRooms() {
                                                 sender: chat.sender,
                                                 recipient: chat.recipient
                                             }}
-                                            backgroundColor={chatRoom?.id === chat.id ? bgColor: defaultColor}
-                                            textColor={chatRoom?.id === chat.id ? textColor: 'black'}
+                                            backgroundColor={chatRoom?.id === chat.id ? bgColor : defaultColor}
+                                            textColor={chatRoom?.id === chat.id ? textColor : 'black'}
                                         />
                                     </ListItemButton>
                                 </ListItem>

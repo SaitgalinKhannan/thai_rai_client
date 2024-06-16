@@ -1,12 +1,25 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
-import {Avatar, Box, Divider, IconButton, ListItem, ListItemButton, Paper} from "@mui/material";
-import {ChatContext, ChatMessageDto} from "../../context/ChatProvider";
+import {
+    DialogContent,
+    Avatar,
+    Box,
+    Dialog,
+    DialogContentText,
+    DialogTitle,
+    Divider,
+    IconButton,
+    ListItem,
+    ListItemButton,
+    Paper,
+    Button, DialogActions, Typography, Chip,
+    Stack
+} from "@mui/material";
+import {ChatContext, ChatMessageDto, MessageType} from "../../context/ChatProvider";
 import {ChatRoom, ChatRoomDto} from "./ChatRoom";
 import {useNavigate, useParams} from "react-router-dom";
-import {useToast} from "@chakra-ui/react";
 import {isMobileScreen} from "../../App";
 import {
-    ChatNotificationDto,
+    ChatNotificationDto, deleteChatMessage,
     findChatMessage,
     findChatMessages,
     getChatRooms, getUser,
@@ -14,26 +27,49 @@ import {
 } from "../../api/Data";
 import {ArrowBackIcon} from "@chakra-ui/icons";
 import profile from "../../assets/images/agents/profile.png";
-import {MessageLeft, MessageRight} from "./Message";
+import {ContextMenu, MessageLeft, MessageRight} from "./Message";
 import {TextInput} from "./TextInput";
 import SockJs from "sockjs-client";
 import Stomp, {Frame, Message} from "stompjs";
 import {flushSync} from "react-dom";
 import {ZonedDateTime} from "@js-joda/core";
 import {sendNotify} from "../../service-worker";
+import useContextMenu from "../../context/useContextMenu";
+import {useTranslation} from "react-i18next";
 
 export default function ChatRooms() {
+    const {t} = useTranslation();
     const {chatId} = useParams();
     const {chatRooms, chatRoom, setChatRoom, setChatRooms, chatMessages, setChatMessages} = useContext(ChatContext);
     const [userId, setUserId] = useState<number | null>(null)
     const [isMobile, setIsMobile] = useState(false)
     const navigate = useNavigate();
-    const toast = useToast()
     const [bgColor, setBgColor] = useState('background.paper')
     const [textColor, setTextColor] = useState('black')
     const defaultColor = 'background.paper'
     const listRef = useRef<HTMLUListElement | null>(null);
     const [connected, setConnected] = useState<boolean>(false)
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleDeleteDialogClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleDeleteDialogClose = () => {
+        setOpen(false);
+    };
+
+    const {
+        clicked,
+        setClicked,
+        points,
+        setPoints,
+        message,
+        setMessage,
+        isMessageLeft,
+        setIsMessageLeft
+    } = useContextMenu();
 
     const toChat = (chatRoom: ChatRoomDto) => {
         setChatRoom(chatRoom)
@@ -56,11 +92,15 @@ export default function ChatRooms() {
     };
 
     const onConnected = () => {
-        setConnected(true)
-        stompClient.subscribe(
-            "/user/" + chatRoom?.sender.id + "/queue/messages",
-            onMessageReceived
-        );
+        try {
+            stompClient.subscribe(
+                "/user/" + chatRoom?.sender.id + "/queue/messages",
+                onMessageReceived
+            )
+            setConnected(true)
+        } catch (e) {
+            console.error(e)
+        }
     };
 
     const onError = (err: string | Frame) => {
@@ -69,24 +109,32 @@ export default function ChatRooms() {
 
     const onMessageReceived = (msg: Message) => {
         const notification = JSON.parse(msg.body) as ChatNotificationDto;
+        console.log(notification.messageType)
 
-        try {
-            sendNotify(notification.message)
-        } catch (e) {
-            console.log(e)
+        if (notification.messageType === MessageType.NEW) {
+            try {
+                sendNotify(notification.message)
+            } catch (e) {
+                console.log(e)
+            }
+
+            findChatMessage(notification.messageId).then((message) => {
+                flushSync(() => addMessageToChat(message))
+            }).catch(e => console.log(e));
+        } else if (notification.messageType === MessageType.DELETED) {
+            flushSync(() => deleteMessageFromChat(notification.messageId))
         }
-
-        findChatMessage(notification.messageId).then((message) => {
-            flushSync(() => addMessageToChat(message))
-
-            listRef.current?.lastElementChild?.scrollIntoView();
-        }).catch(e => console.log(e));
     };
+
+    useEffect(() => {
+        listRef.current?.lastElementChild?.scrollIntoView();
+    }, [chatMessages]);
 
     const sendMessage = (msg: string) => {
         if (msg.trim() !== "" && chatRoom) {
             const message: ChatMessageDto = {
-                id: 0,
+                id: "",
+                relatedMessageId: "",
                 chatId: chatRoom.chatId,
                 sender: chatRoom.sender,
                 recipient: chatRoom.recipient,
@@ -94,7 +142,11 @@ export default function ChatRooms() {
                 zonedDateTime: ZonedDateTime.now().withFixedOffsetZone()
             };
 
-            stompClient.send("/app/chat", {}, JSON.stringify(message));
+            try {
+                stompClient.send("/app/chat", {}, JSON.stringify(message));
+            } catch (e) {
+                console.log(e)
+            }
 
             /*flushSync(() => {
                 addMessageToChat(message);
@@ -108,8 +160,27 @@ export default function ChatRooms() {
         setChatMessages(prevMessages => [...prevMessages, newMessage]);
     }
 
+    const deleteMessageFromChat = (relatedMessageId: string) => {
+        setChatMessages(prevMessages => prevMessages.filter(msg => msg.relatedMessageId !== relatedMessageId));
+    }
+
     const addMessagesToChat = (newMessages: ChatMessageDto[]) => {
         setChatMessages(prevMessages => [...prevMessages, ...newMessages]);
+    }
+
+    async function copyTextToClipboard(text: string) {
+        await navigator.clipboard.writeText(text)
+    }
+
+    async function updateMessage() {
+
+    }
+
+    async function deleteMessage(message: ChatMessageDto) {
+        deleteChatMessage(message)
+            .then(r => console.log(r))
+            .catch(e => console.log(e))
+        handleDeleteDialogClose();
     }
 
     useEffect(() => {
@@ -140,7 +211,7 @@ export default function ChatRooms() {
         }
 
         return () => {
-            if (chatRoom !== null && !connected) {
+            if (chatRoom !== null) {
                 try {
                     stompClient.disconnect(() => {
                         console.log('disconnected')
@@ -188,6 +259,12 @@ export default function ChatRooms() {
     }, [chatRooms]);
 
     useEffect(() => {
+        if (!clicked && !open) {
+            setMessage(null);
+        }
+    }, [clicked, open]);
+
+    useEffect(() => {
         const userIdString = localStorage.getItem('userId')
         const userId = parseInt(userIdString ? userIdString : "-1")
 
@@ -198,13 +275,6 @@ export default function ChatRooms() {
                     setChatRooms(r)
                 }).catch(e => console.error(e));
         } else {
-            toast({
-                title: 'Авторизуйтесь!',
-                status: 'error',
-                duration: 500,
-                isClosable: true,
-                position: 'top'
-            })
             toLogin()
         }
 
@@ -266,8 +336,8 @@ export default function ChatRooms() {
                             >
                                 <ArrowBackIcon/>
                             </IconButton>
-                            
-                            <Box fontWeight="fontWeightBold" fontSize="22px" sx={{marginLeft: '10px'}}>Чаты</Box>
+
+                            <Box fontWeight="fontWeightBold" fontSize="22px" sx={{marginLeft: '10px'}}>{t('chats')}</Box>
                         </Box>
 
                         {chatRooms.map((chat, index) => (
@@ -292,12 +362,13 @@ export default function ChatRooms() {
                         ))}
                     </Box>
 
-                    {!isMobile && chatRoom ?
-                        <Box sx={{
-                            flex: 0.7,
-                            padding: "0",
-                            position: 'relative'
-                        }}>
+                    <Box sx={{
+                        flex: 0.7,
+                        padding: "0",
+                        position: 'relative',
+                        alignContent: 'center',
+                    }}>
+                        {!isMobile && chatRoom ?
                             <Box
                                 width="100%"
                                 height="100%"
@@ -333,14 +404,16 @@ export default function ChatRooms() {
                                                 height: '56px'
                                             }}
                                         >
-                                            {isMobile && <IconButton
-                                                aria-label="send"
-                                                size="large"
-                                                sx={{height: '56px', color: '#2d9d92'}}
-                                                onClick={backToChats}
-                                            >
-                                                <ArrowBackIcon/>
-                                            </IconButton>}
+                                            {
+                                                isMobile && <IconButton
+                                                    aria-label="send"
+                                                    size="large"
+                                                    sx={{height: '56px', color: '#2d9d92'}}
+                                                    onClick={backToChats}
+                                                >
+                                                    <ArrowBackIcon/>
+                                                </IconButton>
+                                            }
                                             <Avatar
                                                 alt={""}
                                                 src={chatRoom?.recipient.id ? userPhoto(chatRoom.recipient.id) : profile}
@@ -356,38 +429,67 @@ export default function ChatRooms() {
                                         </Box>
                                     </Box>
 
-                                    <Box sx={{
-                                        flex: 1,
-                                        overflowY: 'scroll',
-                                        marginTop: '57px',
-                                        marginBottom: isMobile ? '106px' : '56px',
-                                        padding: "16px 16px 0px 16px",
-                                        position: 'relative'
-                                    }}
-                                         ref={listRef}
+                                    <Box
+                                        sx={{
+                                            flex: 1,
+                                            overflowY: 'scroll',
+                                            marginTop: '57px',
+                                            marginBottom: isMobile ? '106px' : '56px',
+                                            padding: "16px 16px 0px 16px",
+                                            position: 'relative'
+                                        }}
+                                        ref={listRef}
                                     >
                                         {chatMessages.map((msg) => (
                                             msg.sender.id === userId ? (
                                                 <MessageRight
                                                     key={msg.id}
-                                                    id={msg.id}
-                                                    chatId={msg.chatId}
-                                                    sender={msg.sender}
-                                                    recipient={msg.recipient}
-                                                    content={msg.content}
-                                                    zonedDateTime={msg.zonedDateTime}
-                                                    status={msg.status}
+                                                    chatMessage={{
+                                                        id: msg.id,
+                                                        relatedMessageId: msg.relatedMessageId,
+                                                        chatId: msg.chatId,
+                                                        sender: msg.sender,
+                                                        recipient: msg.recipient,
+                                                        content: msg.content,
+                                                        zonedDateTime: msg.zonedDateTime,
+                                                        status: msg.status
+                                                    }}
+                                                    onContextMenu={(e) => {
+                                                        console.log(`x: ${e.pageX} y: ${e.pageY}`)
+                                                        e.preventDefault();
+                                                        setClicked(true);
+                                                        setPoints({
+                                                            x: e.pageX,
+                                                            y: e.pageY,
+                                                        });
+                                                        setIsMessageLeft(false);
+                                                        setMessage(msg)
+                                                    }}
                                                 />
                                             ) : (
                                                 <MessageLeft
                                                     key={msg.id}
-                                                    id={msg.id}
-                                                    chatId={msg.chatId}
-                                                    sender={msg.sender}
-                                                    recipient={msg.recipient}
-                                                    content={msg.content}
-                                                    zonedDateTime={msg.zonedDateTime}
-                                                    status={msg.status}
+                                                    chatMessage={{
+                                                        id: msg.id,
+                                                        relatedMessageId: msg.relatedMessageId,
+                                                        chatId: msg.chatId,
+                                                        sender: msg.sender,
+                                                        recipient: msg.recipient,
+                                                        content: msg.content,
+                                                        zonedDateTime: msg.zonedDateTime,
+                                                        status: msg.status
+                                                    }}
+                                                    onContextMenu={(e) => {
+                                                        console.log(`x: ${e.pageX} y: ${e.pageY}`)
+                                                        e.preventDefault();
+                                                        setClicked(true);
+                                                        setPoints({
+                                                            x: e.pageX,
+                                                            y: e.pageY,
+                                                        });
+                                                        setIsMessageLeft(true);
+                                                        setMessage(msg);
+                                                    }}
                                                 />
                                             )
                                         ))}
@@ -401,11 +503,45 @@ export default function ChatRooms() {
                                         <TextInput onClick={sendMessage}/>
                                     </Box>
                                 </Paper>
-                            </Box>
-                        </Box> : <></>
-                    }
+                            </Box> :
+                            <Stack direction="row" spacing={1} justifyContent="center">
+                                <Chip label={t('choose_user_to_write')} variant="filled" sx={{textAlign: "center", fontSize: "14px"}}/>
+                            </Stack>
+                        }
+                    </Box>
                 </Box>
             </Paper>
+            {clicked && message !== null && (
+                <>
+                    <ContextMenu
+                        message={message}
+                        isMessageLeft={isMessageLeft}
+                        top={points.y}
+                        left={points.x}
+                        copyTextToClipboard={copyTextToClipboard}
+                        updateMessage={() => {
+                        }}
+                        deleteMessage={handleDeleteDialogClickOpen}
+                    />
+                </>
+            )}
+            <Dialog
+                open={open}
+                onClose={handleDeleteDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {t('delete_message')}
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleDeleteDialogClose}>{t('cancel')}</Button>
+                    <Button onClick={() => message && deleteMessage(message)} autoFocus
+                    >
+                        {t('delete')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

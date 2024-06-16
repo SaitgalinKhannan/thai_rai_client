@@ -52,7 +52,8 @@ export const ChatRoom = (props: ChatRoomProps) => {
                                 WebkitBoxOrient: 'vertical',
                                 WebkitLineClamp: 1,
                                 color: props.textColor
-                            }}>
+                            }}
+                >
                     Hello everyone! How about meeting next Monday or Wednesday?
                 </Typography>
             </Box>

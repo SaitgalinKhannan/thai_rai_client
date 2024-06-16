@@ -17,6 +17,7 @@ export const theme = extendTheme({
     },
     styles: {
         global: {
+            colorScheme: 'green',
             body: {
                 bg: '#fff'
             }
@@ -25,7 +26,7 @@ export const theme = extendTheme({
     components: {
         Button: {
             defaultProps: {
-                colorScheme: 'telegram',
+                colorScheme: 'green',
             }
         },
         NumberInput:{
@@ -39,6 +40,9 @@ export const theme = extendTheme({
             }
         },
         Select:{
+            defaultProps: {
+                focusBorderColor: '#2d9d92'
+            },
             baseStyle: {
                 _focus: {
                     borderColor: "#2d9d92"
@@ -48,6 +52,11 @@ export const theme = extendTheme({
         Textarea:{
             defaultProps: {
                 focusBorderColor: '#2d9d92'
+            }
+        },
+        Checkbox: {
+            defaultProps: {
+                focusBorderColor: 'green'
             }
         }
     }

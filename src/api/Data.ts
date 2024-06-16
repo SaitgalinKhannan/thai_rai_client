@@ -1,18 +1,19 @@
 import axios, {AxiosRequestConfig} from "axios";
 import {Favorite, Filter, Photo, RealEstateDto, RealEstateInterface, UserDto, UserWithoutPassword} from "./model";
 import {ImageInfo} from "../components/Images/Uploader";
-import {ChatMessageDto} from "../context/ChatProvider";
+import {ChatMessageDto, MessageType} from "../context/ChatProvider";
 import {ChatRoomDto} from "../components/Chat/ChatRoom";
 
-//export const baseUrlForApi = "https://41be-80-244-32-250.ngrok-free.app"
-//export const wsUrl = "https://41be-80-244-32-250.ngrok-free.app/ws"
-//export const baseUrl = "https://76e7-80-244-32-250.ngrok-free.app"
+//export const baseUrlForApi = "https://c1bb-80-244-32-124.ngrok-free.app"
+//export const wsUrl = "https://c1bb-80-244-32-124.ngrok-free.app/ws"
+//export const baseUrl = "https://5e79-80-244-32-124.ngrok-free.app"
 
 export const baseUrlForApi = "http://127.0.0.1:8080"
 export const wsUrl = "http://127.0.0.1:8080/ws"
 export const baseUrl = "http://localhost:3000"
 
 //export const baseUrlForApi = "https://thairai.group:8443"
+//export const wsUrl = "https://thairai.group:8443/ws"
 //export const baseUrl = "https://thairai.group"
 
 interface RealEstateProps {
@@ -26,9 +27,11 @@ export interface AuthenticationResponse {
 }
 
 export interface ChatNotificationDto {
-    messageId: number,
+    chatId: string,
     sender: UserWithoutPassword,
-    message: string
+    messageId: string,
+    message: string,
+    messageType: MessageType
 }
 
 export const saveFavorite = async (favorite: Favorite): Promise<boolean> => {
@@ -365,7 +368,7 @@ export async function findChatMessages(senderId: number, recipientId: number): P
     }
 }
 
-export async function findChatMessage(id: number): Promise<ChatMessageDto> {
+export async function findChatMessage(id: string): Promise<ChatMessageDto> {
     if (!localStorage.getItem('accessToken')) {
         return Promise.reject('No access token set.');
     }
@@ -378,13 +381,18 @@ export async function findChatMessage(id: number): Promise<ChatMessageDto> {
     }
 }
 
-export async function deleteChatMessage(id: number): Promise<boolean> {
-    if (!localStorage.getItem('accessToken')) {
-        return Promise.reject('No access token set.');
-    }
+export async function deleteChatMessage(message: ChatMessageDto): Promise<boolean> {
+    const json = new Blob([JSON.stringify(message)], {type: 'application/json'});
+    const token = localStorage.getItem('accessToken')
 
     try {
-        const response = await axios.delete<boolean>(`${baseUrlForApi}/messages/${id}`);
+        const response = await axios.post<boolean>(`${baseUrlForApi}/messages/delete`, json, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
         return response.data;
     } catch (error) {
         throw error;

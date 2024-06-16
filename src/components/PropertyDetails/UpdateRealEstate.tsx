@@ -17,7 +17,7 @@ import {
     Text,
     Textarea,
     ToastId,
-    useToast
+    useToast, VStack
 } from "@chakra-ui/react";
 import React, {ChangeEvent, useContext, useEffect, useRef, useState} from "react";
 import {
@@ -27,12 +27,12 @@ import {
     facilities,
     Interior,
     interiorMapping,
-    RealEstateDto,
-    rules,
+    RealEstateDto, RentalFeatures,
+    rules, SaleFeatures,
     Status,
     statusMapping
 } from "../../api/model";
-import Uploader, {ImageInfo} from "../Images/Uploader";
+import {ImageInfo} from "../Images/Uploader";
 import {loadImageInfoArray, realEstateById, updateRealEstate, zipArrays} from "../../api/Data";
 import {useNavigate} from "react-router-dom";
 import {ThaiRaiContext} from "../../context/HouseProvider";
@@ -45,9 +45,11 @@ import {
     regionsInCity,
     talangRegionsInCity
 } from "../../data/Address";
+import {useTranslation} from "react-i18next";
 
 export default function UpdateRealEstate() {
     let context = useContext(ThaiRaiContext);
+    const {t} = useTranslation();
     let [id, setId] = useState(0);
     let [name, setName] = useState("");
     let [price, setPrice] = useState(0);
@@ -69,17 +71,140 @@ export default function UpdateRealEstate() {
     let [index, setIndex] = useState("");
     let [houseNumber, setHouseNumber] = useState("");
     let [isUploaded, setIsUploaded] = useState(false);
-    let [buttonText, setButtonText] = useState("Обновить");
+    let [buttonText, setButtonText] = useState(t('update'));
     let toast = useToast()
     let toastIdRef = useRef<ToastId>()
     let navigate = useNavigate();
-    let [interior, setInterior] = useState<string | null>(null)
-    let [rentTime, setRentTime] = useState<string | null>(null)
+
     let [pressedButton, setPressedButton] = useState<string | null>(null)
-    let [ruleItems, setRuleItems] = React.useState([false, false])
-    let [facilityItems, setFacilityItems] = React.useState([false, false, false, false, false, false, false])
+
     const [images, setImages] = useState<ImageInfo[]>([]);
     const [deletedPhotoIds, setDeletedPhotoIds] = useState<number[]>([])
+
+    const [saleFeatures, setSaleFeatures] = useState<SaleFeatures>({
+        id: 0,
+        realEstateId: 0,
+        concierge: false,
+        gatedCommunity: false,
+        openParking: false,
+        closedParking: false,
+        closedTerritory: false,
+        gym: false,
+        playground: false,
+        recreationArea: false,
+        pool: false,
+        terrace: false,
+        fridge: false,
+        dishwasher: false,
+        diningTable: false,
+        kitchenUtensils: false,
+        appliances: false,
+        tv: false,
+        airConditioning: false,
+        wardrobe: false,
+        washingMachine: false,
+        smokingArea: false,
+        wifi: false,
+        interior: null
+    });
+
+    const handleSaleFeaturesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, checked} = event.target;
+        console.log(event.target.name)
+
+        setSaleFeatures((prevState) => ({
+            ...prevState,
+            [name]: checked,
+        }));
+    };
+
+    const [rentalFeatures, setRentalFeatures] = useState<RentalFeatures>({
+        id: 0,
+        realEstateId: 0,
+        rentalTime: '',
+        withPet: false,
+        withChildren: false,
+        airportTransfer: false,
+        beachTransfer: false,
+        concierge: false,
+        openParking: false,
+        closedParking: false,
+        seaView: false,
+        lakeView: false,
+        mountainView: false,
+        forestView: false,
+        courtyard: false,
+        pool: false,
+        outdoorShower: false,
+        bbqArea: false,
+        outdoorDining: false,
+        poolTable: false,
+        gymEquipment: false,
+        car: false,
+        motorbike: false,
+        sleepingPlaces: null,
+        workspace: false,
+        wifi: false,
+        tv: false,
+        airConditioning: false,
+        fridge: false,
+        dishwasher: false,
+        diningTable: false,
+        kitchenUtensils: false,
+        bathtub: false,
+        shower: false,
+        washingMachine: false,
+        cleaning: false,
+        linenChange: false,
+        videoSurveillance: false,
+        closedTerritory: false,
+        smokeDetector: false,
+        firstAidKit: false,
+        fireExtinguisher: false,
+        carbonMonoxideDetector: false,
+        smokingArea: false,
+        interior: null
+    });
+
+    const handleRentalFeaturesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, type, checked, value} = event.target;
+        setRentalFeatures((prevState) => ({
+            ...prevState,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
+    };
+
+    const setSleepingPlaces = (value: number) => {
+        setRentalFeatures((prevState) => ({
+            ...prevState,
+            sleepingPlaces: value,
+        }))
+    };
+
+    const setRentTime = (value: string | null) => {
+        setRentalFeatures((prevState) => ({
+            ...prevState,
+            rentalTime: value,
+        }))
+    };
+
+    const setInteriorFeatures = (value: string) => {
+        const interior = value as Interior;
+
+        if (status === "RENT" && interior) {
+            setRentalFeatures((prevState) => ({
+                ...prevState,
+                interior: interior,
+            }))
+        }
+
+        if(status === "SALE" && interior) {
+            setSaleFeatures((prevState) => ({
+                ...prevState,
+                interior: interior,
+            }))
+        }
+    };
 
     useEffect(() => {
         const realEstateId = localStorage.getItem("realEstateId")
@@ -107,26 +232,14 @@ export default function UpdateRealEstate() {
                 setIndex(house.addressDto.index)
                 setHouseNumber(house.addressDto.houseNumber)
 
-                setInterior(house.additionalParametersDto?.interior ?? null)
-                setRentTime(house.additionalParametersDto?.rentTime ?? null)
+                console.log(house.saleFeaturesDto)
+                console.log(house.rentalFeaturesDto)
 
-                if (house.additionalParametersDto?.facility !== null) {
-                    const facilitiesZipped = zipArrays(facilityItems, facilities);
-                    const facilitiesItems = facilitiesZipped
-                        .map(([bool, str]) => {
-                            return house.additionalParametersDto?.facility?.split(", ").includes(str) ?? false;
-                        })
-                    setFacilityItems(facilitiesItems)
+                if (house.saleFeaturesDto) {
+                    setSaleFeatures(house.saleFeaturesDto)
                 }
-
-
-                if (house.additionalParametersDto?.rules !== null) {
-                    const rulesZipped = zipArrays(ruleItems, rules);
-                    const rulesSItems = rulesZipped
-                        .map(([bool, str]) => {
-                            return house.additionalParametersDto?.rules?.split(", ").includes(str) ?? false;
-                        })
-                    setRuleItems(rulesSItems)
+                if (house.rentalFeaturesDto) {
+                    setRentalFeatures(house.rentalFeaturesDto)
                 }
 
                 loadImageInfoArray(house.photos).then(images => {
@@ -141,25 +254,27 @@ export default function UpdateRealEstate() {
     }, [])
 
     useEffect(() => {
-        setRentTime(pressedButton)
+        if (pressedButton) {
+            setRentTime(pressedButton)
+            console.log(pressedButton)
+        }
     }, [pressedButton])
 
     useEffect(() => {
-        setPressedButton(rentTime)
-    }, [rentTime])
+        if (rentalFeatures.rentalTime) {
+            setPressedButton(rentalFeatures.rentalTime)
+            console.log(rentalFeatures.rentalTime)
+        }
+    }, [rentalFeatures.rentalTime])
 
     const interiorHandler = (event: React.ChangeEvent<HTMLSelectElement>) => {
         if (event.target.value !== "") {
-            setInterior(event.target.value)
+            setInteriorFeatures(event.target.value)
         }
     }
 
     const clearAddFilters = () => {
-        setInterior(null)
-        setRentTime(null)
         setPressedButton(null)
-        setRuleItems([false, false])
-        setFacilityItems([false, false, false, false, false, false, false])
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -170,8 +285,6 @@ export default function UpdateRealEstate() {
         }
 
         if (selectedStatus !== "RENT") {
-            setRentTime(null)
-            setRuleItems([false, false])
         }
     }
 
@@ -268,7 +381,7 @@ export default function UpdateRealEstate() {
         const userId = localStorage.getItem('userId')
         if (userId === null) {
             toast({
-                title: 'Авторизуйтесь!',
+                title: t('log_in'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -277,32 +390,13 @@ export default function UpdateRealEstate() {
         } else {
             if (name.trim() === "" || status?.trim() === "" || type.trim() === "" || country.trim() === "" || region.trim() === "" || district.trim() === "" || regionInCity.trim() === "" || description.trim() === "") {
                 toast({
-                    title: 'Заполните все поля!',
+                    title: t('fill_in_all_the_fields'),
                     status: 'error',
                     duration: 500,
                     isClosable: true,
                     position: 'top'
                 })
             } else {
-                const facilitiesZipped = zipArrays(facilityItems, facilities);
-                const facilitiesString = facilitiesZipped
-                    .filter(([bool, str]) => bool)
-                    .map(([, str]) => str)
-                    .join(", ");
-
-                const rulesZipped = zipArrays(ruleItems, rules);
-                const rulesString = rulesZipped
-                    .filter(([bool, str]) => bool)
-                    .map(([, str]) => str)
-                    .join(", ");
-
-                let additionalParameters: AdditionalParametersDto = {
-                    interior: interior !== "" ? interior : null,
-                    facility: facilitiesString !== "" ? facilitiesString : null,
-                    rentTime: rentTime !== "" ? rentTime : null,
-                    rules: rulesString !== "" ? rulesString : null
-                }
-
                 let realEstate: RealEstateDto = {
                     id: id,
                     ownerId: parseInt(userId),
@@ -326,7 +420,8 @@ export default function UpdateRealEstate() {
                         index: index,
                         houseNumber: houseNumber
                     },
-                    additionalParametersDto: additionalParameters
+                    saleFeaturesDto: saleFeatures,
+                    rentalFeaturesDto: rentalFeatures
                 }
 
                 showToast('loading', 'Загрузка.', "Загружаем данные на сервер.");
@@ -335,14 +430,14 @@ export default function UpdateRealEstate() {
                     const result = await updateRealEstate(realEstate, images.filter(image => !image.isOld), deletedPhotoIds);
 
                     if (result) {
-                        showToast('success', 'Готово.', "Данные успешно изменены.");
+                        showToast('success', t('success'), t('data_uploaded_success'));
                         setIsUploaded(true);
-                        setButtonText("Перейти к объявлению");
+                        setButtonText(t('to_adv'));
                     } else {
-                        showToast('error', 'Ошибка.', "Не удалось обновить данные.");
+                        showToast('error', t('error'), t('data_upload_error'));
                     }
                 } catch (error) {
-                    showToast('error', 'Ошибка.', "Не удалось обновить данные.");
+                    showToast('error', t('error'), t('data_upload_error'));
                     console.log(error);
                 }
             }
@@ -355,7 +450,7 @@ export default function UpdateRealEstate() {
                    my='24px' padding={{base: "0px 16px 0px 16px", lg: "0px"}}
             >
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Название:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('name')}:</Heading>
                     <Input
                         value={name}
                         onChange={e => setName(e.target.value)}
@@ -364,7 +459,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Продажа/Аренда:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('sale/rent')}:</Heading>
                     <Select
                         value={status ?? undefined}
                         onChange={e => handleChange(e)}
@@ -379,7 +474,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Тип здания:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('real_estate_type')}:</Heading>
                     <Select
                         value={type}
                         onChange={e => setType(e.target.value)}
@@ -394,7 +489,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Цена:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('price')}:</Heading>
                     <NumberInput
                         size='md'
                         value={price}
@@ -408,7 +503,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Страна:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('country')}:</Heading>
                     <Select
                         onChange={e => setCountry(e.target.value)}
                         value={country}
@@ -429,7 +524,7 @@ export default function UpdateRealEstate() {
                    padding={{base: "0px 16px 0px 16px", lg: "0px"}}
             >
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Провинция:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('province')}:</Heading>
                     <Select
                         onChange={e => setCountry(e.target.value)}
                         value={region}
@@ -446,7 +541,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Район:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('district')}:</Heading>
                     <Select
                         onChange={e => districtChange(e)}
                         value={district}
@@ -463,11 +558,11 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Тамбон:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('tambon')}:</Heading>
                     <Select
                         onChange={e => setRegionInCity(e.target.value)}
-                        placeholder={"Тамбон"}
-                        value={regionInCity !== "" && regionInCity || undefined}
+                        placeholder={t('tambon')}
+                        value={regionInCity !== "" ? regionInCity : undefined}
                         background={"#fff"}
                     >
                         {
@@ -480,7 +575,7 @@ export default function UpdateRealEstate() {
                     </Select>
                 </Box>
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Улица:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('street')}:</Heading>
                     <Input
                         value={street}
                         onChange={e => setStreet(e.target.value)}
@@ -488,7 +583,7 @@ export default function UpdateRealEstate() {
                     ></Input>
                 </Box>
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Индекс:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('index')}:</Heading>
                     <Input
                         value={index}
                         onChange={e => setIndex(e.target.value)}
@@ -496,7 +591,7 @@ export default function UpdateRealEstate() {
                     ></Input>
                 </Box>
                 <Box width={{base: "100%", lg: "50%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Дом:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('house')}:</Heading>
                     <Input
                         value={houseNumber}
                         onChange={e => setHouseNumber(e.target.value)}
@@ -509,7 +604,7 @@ export default function UpdateRealEstate() {
                    align={{lg: 'center'}} my='24px' padding={{base: "0px 16px 0px 16px", lg: "0px"}}
             >
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Кол-во комнат:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('room_count_short')}:</Heading>
                     <NumberInput
                         size='md'
                         value={roomCount}
@@ -527,7 +622,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Площадь:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('area')}:</Heading>
                     <NumberInput
                         size='md'
                         value={area}
@@ -545,7 +640,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Этаж:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('floor')}:</Heading>
                     <NumberInput
                         size='md'
                         value={floor}
@@ -563,7 +658,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Всего этажей:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('total_floors')}:</Heading>
                     <NumberInput
                         size='md'
                         value={numberOfFloors}
@@ -581,7 +676,7 @@ export default function UpdateRealEstate() {
                 </Box>
 
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Год постройки:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('year_of_construction')}:</Heading>
                     <NumberInput
                         size='md'
                         value={constructionYear}
@@ -599,53 +694,324 @@ export default function UpdateRealEstate() {
                 </Box>
             </Stack>
 
-            <Checkbox
-                checked={newBuilding}
-                fontSize={{base: "18px", lg: "22px"}}
-                color="black"
-                width="100%"
-                padding={{base: "0px 16px 0px 16px", lg: "0px"}}
-                onChange={e => setNewBuilding(e.target.checked)}
-                colorScheme="green"
+            <Stack direction={{base: 'column', lg: 'row'}} width={{base: "100%", lg: "100%"}} justify='space-between'
+                   align={{lg: 'center'}} my='24px' padding={{base: "0px 16px 0px 16px", lg: "0px"}}
             >
-                Новостройка
-            </Checkbox>
-
-
-            <Stack direction={{base: 'column', lg: 'row'}} justify='space-around' align={{lg: 'center'}}
-                   my='24px' spacing={"16px"} px={"16px"}
-            >
-                <Stack direction="column"
-                       justify='space-between'
-                       align={{lg: 'center'}}
-                       spacing={"16px"}
-                >
-                    <Box width={{base: "100%", lg: "100%"}}>
-                        <Text fontSize={"16px"} textColor={"#2d9d92"}>Интерьер</Text>
-                        <Select
-                            height="44px"
-                            width="100%"
-                            variant="filled"
-                            value={interior ?? undefined}
-                            onChange={interiorHandler}
+                {
+                    status === "RENT" &&
+                    <Box width={{base: "100%", lg: "30%"}}>
+                        <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('sleepingPlaces')}:</Heading>
+                        <NumberInput
+                            size='md'
+                            defaultValue={rentalFeatures.sleepingPlaces || 0}
+                            min={0}
+                            name={"sleepingPlaces"}
                         >
-                            {
-                                Object.values(Interior).map((type) => (
-                                    <option key={type} value={interiorMapping[type]}>
-                                        {type}
-                                    </option>
-                                ))
-                            }
-                        </Select>
+                            <NumberInputField
+                                onChange={e => rentalFeatures.sleepingPlaces && setSleepingPlaces(parseInt(e.target.value))}
+                                background={"#fff"}
+                            />
+                            <NumberInputStepper>
+                                <NumberIncrementStepper
+                                    onClick={() => rentalFeatures.sleepingPlaces && setSleepingPlaces(rentalFeatures.sleepingPlaces + 1)}/>
+                                <NumberDecrementStepper
+                                    onClick={() => rentalFeatures.sleepingPlaces && setSleepingPlaces(rentalFeatures.sleepingPlaces - 1)}/>
+                            </NumberInputStepper>
+                        </NumberInput>
+                    </Box>
+                }
+
+                <Checkbox
+                    fontSize={{base: "18px", lg: "22px"}}
+                    color="black"
+                    width="100%"
+                    padding={{base: "0px 16px 0px 16px", lg: "0px"}}
+                    onChange={e => setNewBuilding(e.target.checked)}
+                    colorScheme="green"
+                >
+                    {t('new')}
+                </Checkbox>
+            </Stack>
+
+            {
+                status === "SALE" &&
+                <Stack
+                    direction={{base: 'column', lg: 'row'}}
+                    justify='space-between'
+                    my='24px' spacing={"16px"}
+                >
+                    <Stack
+                        direction="column"
+                        justify='space-between'
+                        align={{lg: 'center'}}
+                        spacing={"16px"}
+                        width={{base: "100%", lg: "100%"}}
+                    >
+                        <Box width={{base: "100%", lg: "100%"}}>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('interior')}</Text>
+                            <Select
+                                height="44px"
+                                width="100%"
+                                variant="filled"
+                                placeholder={t('interior')}
+                                value={(rentalFeatures.interior && interiorMapping[rentalFeatures.interior]) || (saleFeatures.interior && interiorMapping[saleFeatures.interior]) || undefined}
+                                onChange={interiorHandler}
+                                colorScheme={"green"}
+                            >
+                                {
+                                    Object.values(Interior).map((type) => (
+                                        <option key={type} value={interiorMapping[type]}>
+                                            {type}
+                                        </option>
+                                    ))
+                                }
+                            </Select>
+                        </Box>
+                    </Stack>
+
+                    <Box width={{base: "100%", lg: "100%"}}>
+                        <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('facilities')}</Text>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.concierge || false}
+                            name={"concierge"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('concierge')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.gatedCommunity || false}
+                            name={"gatedCommunity"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('gatedCommunity')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.openParking || false}
+                            name={"openParking"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('openParking')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.closedParking || false}
+                            name={"closedParking"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('closedParking')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.closedTerritory || false}
+                            name={"closedTerritory"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('closedTerritory')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.gym || false}
+                            name={"gym"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('gym')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.playground || false}
+                            name={"playground"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('playground')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.recreationArea || false}
+                            name={"recreationArea"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('recreationArea')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.pool || false}
+                            name={"pool"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('pool')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.terrace || false}
+                            name={"terrace"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('terrace')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.wifi || false}
+                            name={"wifi"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('wifi')}
+                        </Checkbox>
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.washingMachine || false}
+                            name={"washingMachine"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('washingMachine')}
+                        </Checkbox>
+
+                        <Checkbox
+                            colorScheme="green"
+                            width={"100%"}
+                            isChecked={saleFeatures.smokingArea || false}
+                            name={"smokingArea"}
+                            onChange={handleSaleFeaturesChange}
+                        >
+                            {t('smokingArea')}
+                        </Checkbox>
                     </Box>
 
-                    {
-                        status === "RENT" &&
+                    <VStack width={"100%"}>
                         <Box width={{base: "100%", lg: "100%"}}>
-                            <Text fontSize={"16px"} textColor={"#2d9d92"}>Срок аренды</Text>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('kitchen')}</Text>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.fridge || false}
+                                name={"fridge"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('fridge')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.dishwasher || false}
+                                name={"dishwasher"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('dishwasher')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.diningTable || false}
+                                name={"diningTable"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('diningTable')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.kitchenUtensils || false}
+                                name={"kitchenUtensils"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('kitchenUtensils')}
+                            </Checkbox>
+                        </Box>
+
+                        <Box width={{base: "100%", lg: "100%"}}>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('livingRoom')}</Text>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.appliances || false}
+                                name={"appliances"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('appliances')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.tv || false}
+                                name={"tv"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('tv')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.airConditioning || false}
+                                name={"airConditioning"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('airConditioning')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={saleFeatures.wardrobe || false}
+                                name={"wardrobe"}
+                                onChange={handleSaleFeaturesChange}
+                            >
+                                {t('wardrobe')}
+                            </Checkbox>
+                        </Box>
+                    </VStack>
+                </Stack>
+            }
+
+            {
+                status === "RENT" &&
+                <Stack direction={{base: 'column', lg: 'row'}}
+                       justify='space-between' my='24px' spacing={"16px"}
+                >
+                    <VStack spacing={"16px"} width={"100%"}>
+                        <Box width={"100%"}>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('interior')}</Text>
+                            <Select
+                                height="44px"
+                                width="100%"
+                                variant="filled"
+                                colorScheme="green"
+                                placeholder={t('interior')}
+                                onChange={interiorHandler}
+                            >
+                                {
+                                    Object.values(Interior).map((type) => (
+                                        <option key={type} value={interiorMapping[type]}>
+                                            {type}
+                                        </option>
+                                    ))
+                                }
+                            </Select>
+                        </Box>
+
+
+                        <Box width={"100%"}>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('rent_time')}</Text>
                             <ButtonGroup
                                 variant="contained"
-                                aria-label="Срок аренды"
+                                aria-label={t('rent_time')}
                                 spacing={0}
                                 width="100%"
                                 alignItems={"center"}
@@ -665,7 +1031,7 @@ export default function UpdateRealEstate() {
                                     backgroundColor={pressedButton === "daily" ? "#2d9d92" : "#ffffff"}
                                     onClick={() => setPressedButton("daily")}
                                 >
-                                    Посуточно
+                                    {t('daily')}
                                 </Button>
                                 <Divider orientation='vertical' height="70%"/>
                                 <Button
@@ -680,104 +1046,414 @@ export default function UpdateRealEstate() {
                                     backgroundColor={pressedButton === "long" ? "#2d9d92" : "#ffffff"}
                                     onClick={() => setPressedButton("long")}
                                 >
-                                    На длительный срок
+                                    {t('long_time')}
                                 </Button>
                             </ButtonGroup>
-                        </Box>}
+                        </Box>
+                    </VStack>
+
+                    <Stack direction={{base: 'column', md: 'column'}} width={"100%"}>
+                        <VStack width={"100%"}>
+                            <Box width={"100%"}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('facilities')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.airportTransfer || false}
+                                    name={"airportTransfer"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('airportTransfer')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.beachTransfer || false}
+                                    name={"beachTransfer"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('beachTransfer')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.concierge || false}
+                                    name={"concierge"}
+                                    onChange={handleRentalFeaturesChange || false}
+                                >
+                                    {t('concierge')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.openParking || false}
+                                    name={"openParking"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('openParking')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.closedParking || false}
+                                    name={"closedParking"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('closedParking')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.smokingArea || false}
+                                    name={"smokingArea"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('smokingArea')}
+                                </Checkbox>
+                            </Box>
+
+                            <Box width={"100%"}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('facilitiesInside')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.workspace || false}
+                                    name={"workspace"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('workspace')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.wifi || false}
+                                    name={"wifi"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('wifi')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.tv || false}
+                                    name={"tv"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('tv')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.airConditioning || false}
+                                    name={"airConditioning"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('airConditioning')}
+                                </Checkbox>
+                            </Box>
+                        </VStack>
+
+                        <Box width={"100%"}>
+                            <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('peculiarities')}</Text>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.seaView || false}
+                                name={"seaView"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('seaView')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.lakeView || false}
+                                name={"lakeView"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('lakeView')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.mountainView}
+                                name={"mountainView"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('mountainView')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.forestView}
+                                name={"forestView"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('forestView')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.courtyard}
+                                name={"courtyard"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('courtyard')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.pool}
+                                name={"pool"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('pool')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.outdoorShower}
+                                name={"outdoorShower"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('outdoorShower')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.bbqArea}
+                                name={"bbqArea"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('bbqArea')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.outdoorDining}
+                                name={"outdoorDining"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('outdoorDining')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.poolTable}
+                                name={"poolTable"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('poolTable')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.gymEquipment}
+                                name={"gymEquipment"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('gymEquipment')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.car}
+                                name={"car"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('car')}
+                            </Checkbox>
+                            <Checkbox
+                                colorScheme="green"
+                                width={"100%"}
+                                isChecked={rentalFeatures.motorbike}
+                                name={"motorbike"}
+                                onChange={handleRentalFeaturesChange}
+                            >
+                                {t('motorbike')}
+                            </Checkbox>
+                        </Box>
+                    </Stack>
+
+                    <Stack direction={{base: 'column', md: 'column'}} width={"100%"}>
+                        <VStack width={"100%"}>
+                            <Box width={{base: "100%", lg: "100%"}}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('kitchen')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.fridge}
+                                    name={"fridge"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('fridge')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.dishwasher}
+                                    name={"dishwasher"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('dishwasher')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.diningTable}
+                                    name={"diningTable"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('diningTable')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.kitchenUtensils}
+                                    name={"kitchenUtensils"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('kitchenUtensils')}
+                                </Checkbox>
+                            </Box>
+
+                            <Box width={{base: "100%", lg: "100%"}}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('bathroom')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.bathtub}
+                                    name={"bathtub"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('bathtub')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.shower}
+                                    name={"shower"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('shower')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.washingMachine}
+                                    name={"washingMachine"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('washingMachine')}
+                                </Checkbox>
+                            </Box>
+
+                            <Box width={{base: "100%", lg: "100%"}}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('additionally')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.cleaning}
+                                    name={"cleaning"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('cleaning')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.linenChange}
+                                    name={"linenChange"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('linenChange')}
+                                </Checkbox>
+                            </Box>
+                        </VStack>
+
+                        <VStack width={"100%"}>
+                            <Box width={{base: "100%", lg: "100%"}}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('rules')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.withPet}
+                                    name={"withPet"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('with_pets')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.withChildren}
+                                    name={"withChildren"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('with_childes')}
+                                </Checkbox>
+                            </Box>
+                            <Box width={{base: "100%", lg: "100%"}}>
+                                <Text fontSize={"16px"} textColor={"#2d9d92"}>{t('safety')}</Text>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.videoSurveillance}
+                                    name={"videoSurveillance"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('videoSurveillance')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.closedTerritory}
+                                    name={"closedTerritory"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('closedTerritory')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.smokeDetector}
+                                    name={"smokeDetector"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('smokeDetector')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.firstAidKit}
+                                    name={"firstAidKit"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('firstAidKit')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.fireExtinguisher}
+                                    name={"fireExtinguisher"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('fireExtinguisher')}
+                                </Checkbox>
+                                <Checkbox
+                                    colorScheme="green"
+                                    width={"100%"}
+                                    isChecked={rentalFeatures.carbonMonoxideDetector}
+                                    name={"carbonMonoxideDetector"}
+                                    onChange={handleRentalFeaturesChange}
+                                >
+                                    {t('carbonMonoxideDetector')}
+                                </Checkbox>
+                            </Box>
+                        </VStack>
+                    </Stack>
                 </Stack>
-
-                <Box>
-                    <Text fontSize={"16px"} textColor={"#2d9d92"}>Удобства</Text>
-                    <HStack>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[0]}
-                            onChange={(e) => setFacilityItems([e.target.checked, facilityItems[1], facilityItems[2], facilityItems[3], facilityItems[4], facilityItems[5], facilityItems[6]])}
-                        >
-                            Бассейн
-                        </Checkbox>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[1]}
-                            onChange={(e) => setFacilityItems([facilityItems[0], e.target.checked, facilityItems[2], facilityItems[3], facilityItems[4], facilityItems[5], facilityItems[6]])}
-                        >
-                            Парковка
-                        </Checkbox>
-                    </HStack>
-                    <HStack>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[2]}
-                            onChange={(e) => setFacilityItems([facilityItems[0], facilityItems[1], e.target.checked, facilityItems[3], facilityItems[4], facilityItems[5], facilityItems[6]])}
-                        >
-                            Тренажерный зал
-                        </Checkbox>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[3]}
-                            onChange={(e) => setFacilityItems([facilityItems[0], facilityItems[1], facilityItems[2], e.target.checked, facilityItems[4], facilityItems[5], facilityItems[6]])}
-                        >
-                            WI-FI
-                        </Checkbox>
-                    </HStack>
-
-                    <HStack>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[4]}
-                            onChange={(e) => setFacilityItems([facilityItems[0], facilityItems[1], facilityItems[2], facilityItems[3], e.target.checked, facilityItems[5], facilityItems[6]])}
-                        >
-                            Стиральная машина
-                        </Checkbox>
-                        <Checkbox
-                            colorScheme="green"
-                            width={"100%"}
-                            isChecked={facilityItems[5]}
-                            onChange={(e) => setFacilityItems([facilityItems[0], facilityItems[1], facilityItems[2], facilityItems[3], facilityItems[4], e.target.checked, facilityItems[6]])}
-                        >
-                            Уборка
-                        </Checkbox>
-                    </HStack>
-                    <Checkbox
-                        colorScheme="green"
-                        width={"100%"}
-                        isChecked={facilityItems[6]}
-                        onChange={(e) => setFacilityItems([facilityItems[0], facilityItems[1], facilityItems[2], facilityItems[3], facilityItems[4], facilityItems[5], e.target.checked])}
-                    >
-                        Место для курения
-                    </Checkbox>
-                </Box>
-
-                {
-                    status === "RENT" &&
-                    <Box>
-                        <Text fontSize={"16px"} textColor={"#2d9d92"}>Правила</Text>
-                        <Stack direction={{base: 'row', lg: 'column'}}>
-                            <Checkbox
-                                colorScheme="green"
-                                width={"100%"}
-                                isChecked={ruleItems[0]}
-                                onChange={(e) => setRuleItems([e.target.checked, ruleItems[1]])}
-                            >
-                                С детьми
-                            </Checkbox>
-                            <Checkbox
-                                colorScheme="green"
-                                width={"100%"}
-                                isChecked={ruleItems[1]}
-                                onChange={(e) => setRuleItems([ruleItems[0], e.target.checked])}
-                            >
-                                С животными
-                            </Checkbox>
-                        </Stack>
-                    </Box>
-                }
-            </Stack>
+            }
 
             <Box width="100%" my='16px'>
                 <Stack align={"center"}>
@@ -786,7 +1462,7 @@ export default function UpdateRealEstate() {
                         onClick={clearAddFilters}
                         _hover={{background: "#9cb1b1"}}
                     >
-                        Сбросить дополнительные параметры
+                        {t('reset_add_params')}
                     </Button>
                 </Stack>
             </Box>
@@ -796,11 +1472,11 @@ export default function UpdateRealEstate() {
                    padding={{base: "0px 16px 0px 16px", lg: "0px"}}
             >
                 <Box width={{base: "100%", lg: "100%"}}>
-                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">Описание:</Heading>
+                    <Heading fontSize={{base: "18px", lg: "22px"}} color="black">{t('description')}:</Heading>
                     <Textarea
                         value={description}
                         onChange={e => setDescription(e.target.value)}
-                        placeholder='Описание'
+                        placeholder={t('description')}
                         size='md'
                         resize='vertical'
                         background={"#fff"}

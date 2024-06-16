@@ -15,7 +15,7 @@ type UploaderProps = {
     images: ImageInfo[];
 };
 
-function Uploader({onImagesChange: onImagesChange, images: propImages}: Readonly<UploaderProps>) {
+function Uploader({onImagesChange, images: propImages}: Readonly<UploaderProps>) {
     const [images, setImages] = useState<ImageInfo[]>(propImages);
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {

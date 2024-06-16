@@ -5,11 +5,13 @@ import {useNavigate} from "react-router-dom";
 import HouseItem from "./HouseItem";
 import left from "../../assets/images/icons/left-arrow.png";
 import right from "../../assets/images/icons/right-arrow.png"
+import {useTranslation} from "react-i18next";
 
 export default function HouseList() {
     const realEstateContext = useContext(ThaiRaiContext);
     const {offset, setOffset} = useContext(ThaiRaiContext);
     const navigate = useNavigate()
+    const {t} = useTranslation();
 
     function leftButtonHandler() {
         if (offset > 0) {
@@ -34,7 +36,7 @@ export default function HouseList() {
             <>
                 <Center>
                     <Heading size="lg" p={{base: '6', lg: '10'}} text-align="center" color={"#2d9d92"}>
-                        Ничего нет...
+                        {t('nothing')}
                     </Heading>
                 </Center>
 
@@ -44,7 +46,7 @@ export default function HouseList() {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Предыдущая страница"
+                        aria-label={t('prev_page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -61,7 +63,7 @@ export default function HouseList() {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Следующая страница"
+                        aria-label={t('page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -77,7 +79,7 @@ export default function HouseList() {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Следующая страница"
+                        aria-label={t('next_page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -123,7 +125,7 @@ export default function HouseList() {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Предыдущая страница"
+                    aria-label={t('prev_page')}
                     minW="44px"
                     width="44px"
                     height="44px"
@@ -140,7 +142,7 @@ export default function HouseList() {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Следующая страница"
+                    aria-label={t('page')}
                     minW="44px"
                     width="44px"
                     height="44px"
@@ -156,7 +158,7 @@ export default function HouseList() {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Следующая страница"
+                    aria-label={t('next_page')}
                     minW="44px"
                     width="44px"
                     height="44px"

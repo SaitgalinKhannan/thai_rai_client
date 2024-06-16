@@ -15,8 +15,10 @@ import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import {authUser, registerUser} from "../../api/Data";
 import {useNavigate} from "react-router-dom";
 import {Role, UserDto} from "../../api/model";
+import {useTranslation} from "react-i18next";
 
 export default function SignUp() {
+    const {t} = useTranslation();
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
@@ -32,7 +34,7 @@ export default function SignUp() {
     const signUpHandleClick = async () => {
         if (firstName === "") {
             toast({
-                title: 'Введите имя!',
+                title: t('enter_name'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -43,7 +45,7 @@ export default function SignUp() {
 
         if (lastName === "") {
             toast({
-                title: 'Введите фамилию!',
+                title: t('enter_lastname'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -54,7 +56,7 @@ export default function SignUp() {
 
         if (email === "") {
             toast({
-                title: 'Введите почтовый адрес!',
+                title: t('enter_email'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -65,7 +67,7 @@ export default function SignUp() {
 
         if (phone === "") {
             toast({
-                title: 'Введите номер телефона!',
+                title: t('enter_phone'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -76,7 +78,7 @@ export default function SignUp() {
 
         if (password === "") {
             toast({
-                title: 'Введите пароль!',
+                title: t('enter_pass'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -87,7 +89,7 @@ export default function SignUp() {
 
         if (passwordConfirmation === "") {
             toast({
-                title: 'Введите пароль еще раз!',
+                title: t('enter_pass_again'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -98,7 +100,7 @@ export default function SignUp() {
 
         if (passwordConfirmation !== password) {
             toast({
-                title: 'Пароли должны совпадать!',
+                title: t('pass_eq'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -118,7 +120,7 @@ export default function SignUp() {
         }
 
         toastIdRef.current = toast({
-            title: 'Загрузка',
+            title: t('loading'),
             status: 'loading',
             isClosable: true,
             position: 'top'
@@ -142,7 +144,7 @@ export default function SignUp() {
 
                     if (toastIdRef.current) {
                         toast.update(toastIdRef.current, {
-                            title: 'Регистрация успешно пройдена!',
+                            title: t('sign_up_success'),
                             status: 'success',
                             duration: 1000,
                             isClosable: true,
@@ -158,8 +160,8 @@ export default function SignUp() {
                 console.log(e)
                 if (toastIdRef.current) {
                     toast.update(toastIdRef.current, {
-                        title: 'Не удалось зарегестрироваться!',
-                        description: "Пользователь с таким почтовым адресом уже существует.",
+                        title: t('sign_up_error'),
+                        description: t('the_mailing_address_is_already_registered'),
                         status: 'error',
                         duration: 1000,
                         isClosable: true,
@@ -198,7 +200,7 @@ export default function SignUp() {
                                     </InputLeftElement>
                                     <Input
                                         type="lastname"
-                                        placeholder="Фамилия"
+                                        placeholder={t('lastname')}
                                         value={lastName}
                                         onChange={e => {
                                             setLastName(e.target.value)
@@ -213,7 +215,7 @@ export default function SignUp() {
                                     </InputLeftElement>
                                     <Input
                                         type="firstname"
-                                        placeholder="Имя"
+                                        placeholder={t('first_name')}
                                         value={firstName}
                                         onChange={e => {
                                             setFirstName(e.target.value)
@@ -243,7 +245,7 @@ export default function SignUp() {
                                     </InputLeftElement>
                                     <Input
                                         type="phone"
-                                        placeholder="Номер телефона"
+                                        placeholder={t('phone_number')}
                                         value={phone}
                                         onChange={e => {
                                             setPhone(e.target.value)
@@ -258,7 +260,7 @@ export default function SignUp() {
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Пароль"
+                                        placeholder={t('password')}
                                         value={password}
                                         onChange={e => {
                                             setPassword(e.target.value)
@@ -283,7 +285,7 @@ export default function SignUp() {
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Потверждение пароля"
+                                        placeholder={t('password_confirmation')}
                                         value={passwordConfirmation}
                                         onChange={e => {
                                             setPasswordConfirmation(e.target.value)
@@ -306,7 +308,7 @@ export default function SignUp() {
                                 onClick={signUpHandleClick}
                                 _hover={{background: "#9cb1b1"}}
                             >
-                                Зарегистрироваться
+                                {t('register')}
                             </Button>
                         </Stack>
                     </form>

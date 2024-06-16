@@ -1,7 +1,6 @@
-import React, {createContext, useEffect, useMemo, useState} from "react";
+import React, {createContext, useMemo, useState} from "react";
 import {ChatRoomDto} from "../components/Chat/ChatRoom";
-import {getChatRooms} from "../api/Data";
-import {UserDto, UserWithoutPassword} from "../api/model";
+import {UserWithoutPassword} from "../api/model";
 import {ZonedDateTime} from "@js-joda/core";
 
 export interface TempMessage {
@@ -10,18 +9,25 @@ export interface TempMessage {
 }
 
 export enum MessageStatus {
-    RECEIVED,
-    DELIVERED
+    RECEIVED = "RECEIVED",
+    DELIVERED = "DELIVERED"
+}
+
+export enum MessageType {
+    NEW = "NEW",
+    UPDATED = "UPDATED",
+    DELETED = "DELETED"
 }
 
 export interface ChatMessageDto {
-    id: number;
+    id: string;
+    relatedMessageId: string,
     chatId: string;
     sender: UserWithoutPassword;
     recipient: UserWithoutPassword;
     content: string;
     zonedDateTime: ZonedDateTime;
-    status?: MessageStatus;
+    status?: MessageType;
 }
 
 export interface ChatContextI {

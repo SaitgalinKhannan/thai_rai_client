@@ -1,13 +1,4 @@
-import {
-    Button, ButtonGroup,
-    Drawer, DrawerBody, DrawerContent, DrawerHeader,
-    DrawerOverlay,
-    Flex, HStack,
-    Image, Link, Text,
-    useBreakpointValue,
-    useDisclosure,
-    VStack
-} from "@chakra-ui/react";
+import {Button, ButtonGroup, Flex, Image, useBreakpointValue, VStack} from "@chakra-ui/react";
 import React, {useContext, useEffect} from "react";
 import {ThaiRaiContext} from "../../context/HouseProvider";
 import {useNavigate} from "react-router-dom";
@@ -22,14 +13,13 @@ import {SearchContext} from "../../context/SearchProvider";
 import {StatusForUsers, statusForUsersMapping} from "../../api/model";
 import RoomCountFilter from "./RoomCountFilter";
 import NewBuildingFilter from "./NewBuildingFilter";
-import InteriorFilter from "./InteriorFilter";
 import AdditionalFilters from "./AdditionalFilters";
+import {useTranslation} from "react-i18next";
 
 export default function Search() {
     const isDesktop = useBreakpointValue({base: false, lg: true})
     const isMobile = useBreakpointValue({base: true, lg: false})
     const {isLoading} = useContext(ThaiRaiContext)
-
     return (
         <>
             {!isLoading && ((isDesktop && <DesktopSearch/>) || (isMobile && <MobileSearch/>))}
@@ -42,6 +32,7 @@ function MobileSearch() {
     const {resetFilter} = useContext(ThaiRaiContext);
     const navigate = useNavigate();
     const searchContext = useContext(SearchContext)
+    const {t} = useTranslation();
 
     useEffect(() => {
         searchContext.setAreaFrom(null)
@@ -81,8 +72,7 @@ function MobileSearch() {
                     overflow={"hidden"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Аренда
-                    недвижимости
+                    {t('rental_property')}
                 </Button>
                 <Button
                     height="80px"
@@ -98,8 +88,7 @@ function MobileSearch() {
                     overflow={"hidden"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Покупка
-                    недвижимости
+                    {t('buying_a_property')}
                 </Button>
             </Flex>
 
@@ -157,7 +146,7 @@ function MobileSearch() {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Фильры"
+                    aria-label={t('filters')}
                     minW="44px"
                     width="44px"
                     height="44px"
@@ -180,7 +169,7 @@ function MobileSearch() {
                     padding={"0px 16px 0px 16px"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Поиск
+                    {t('search')}
                 </Button>
                 <Button
                     className="submitButton"
@@ -192,8 +181,7 @@ function MobileSearch() {
                     padding={"0px 16px 0px 16px"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Сбросить
-                    фильтры
+                    {t('reset_filters')}
                 </Button>
             </Flex>
         </VStack>
@@ -201,7 +189,8 @@ function MobileSearch() {
 }
 
 function DesktopSearch() {
-    const searchContext = useContext(SearchContext)
+    const searchContext = useContext(SearchContext);
+    const {t} = useTranslation();
     useBreakpointValue({base: false, lg: true});
 
     function rentButton() {
@@ -229,8 +218,7 @@ function DesktopSearch() {
                     overflow={"hidden"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Аренда
-                    недвижимости
+                    {t('rental_property')}
                 </Button>
                 <Button
                     height="80px"
@@ -246,8 +234,7 @@ function DesktopSearch() {
                     overflow={"hidden"}
                     _hover={{background: "#e2e8f0"}}
                 >
-                    Покупка
-                    недвижимости
+                    {t('buying_a_property')}
                 </Button>
 
                 {/*<Button
@@ -320,7 +307,7 @@ function DesktopSearch() {
                         padding={"0px 16px 0px 16px"}
                         _hover={{background: "#e2e8f0"}}
                     >
-                        Поиск
+                        {t('search')}
                     </Button>
                     <Button
                         className="submitButton"
@@ -332,8 +319,7 @@ function DesktopSearch() {
                         padding={"0px 16px 0px 16px"}
                         _hover={{background: "#e2e8f0"}}
                     >
-                        Сбросить
-                        фильтры
+                        {t('reset_filters')}
                     </Button>
                 </ButtonGroup>
             </Flex>

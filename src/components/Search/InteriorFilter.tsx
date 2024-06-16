@@ -1,11 +1,13 @@
 import React, {useContext, useEffect} from "react";
 import {Checkbox, HStack, Stack, Text} from "@chakra-ui/react";
 import {SearchContext} from "../../context/SearchProvider";
+import {useTranslation} from "react-i18next";
 
 export default function InteriorFilter() {
     const {interiorItems, setInteriorItems} = useContext(SearchContext)
     const [checkedItems, setCheckedItems] = React.useState([false, false, false, false, false])
     const interiors = ["Любой", "Европейский", "Тайский", "Дизайнерский", "Без мебели/Частично"]
+    const {t} = useTranslation();
 
     useEffect(() => {
         setCheckedItems(interiorItems)
@@ -25,7 +27,7 @@ export default function InteriorFilter() {
                     isChecked={checkedItems[0]}
                     onChange={(e) => setCheckedItems([e.target.checked, checkedItems[1], checkedItems[2], checkedItems[3], checkedItems[4]])}
                 >
-                    Любой
+                    {t('any')}
                 </Checkbox>
                 <Checkbox
                     colorScheme="green"
@@ -33,7 +35,7 @@ export default function InteriorFilter() {
                     isChecked={checkedItems[1]}
                     onChange={(e) => setCheckedItems([checkedItems[0], e.target.checked, checkedItems[2], checkedItems[3], checkedItems[4]])}
                 >
-                    Тайский
+                    {t('thai')}
                 </Checkbox>
             </HStack>
             <HStack>
@@ -43,7 +45,7 @@ export default function InteriorFilter() {
                     isChecked={checkedItems[2]}
                     onChange={(e) => setCheckedItems([checkedItems[0], checkedItems[1], e.target.checked, checkedItems[3], checkedItems[4]])}
                 >
-                    Европейский
+                    {t('euro')}
                 </Checkbox>
                 <Checkbox
                     colorScheme="green"
@@ -51,7 +53,7 @@ export default function InteriorFilter() {
                     isChecked={checkedItems[3]}
                     onChange={(e) => setCheckedItems([checkedItems[0], checkedItems[1], checkedItems[2], e.target.checked, checkedItems[4]])}
                 >
-                    Дизайнерский
+                    {t('design')}
                 </Checkbox>
             </HStack>
             <Checkbox
@@ -60,7 +62,7 @@ export default function InteriorFilter() {
                 isChecked={checkedItems[4]}
                 onChange={(e) => setCheckedItems([checkedItems[0], checkedItems[1], checkedItems[2], checkedItems[3], e.target.checked])}
             >
-                Без мебели / Частично
+                {t('without_furniture')}
             </Checkbox>
         </Stack>
     )

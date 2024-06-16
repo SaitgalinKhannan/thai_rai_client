@@ -2,10 +2,11 @@ import React, {useContext, useEffect, useState} from "react";
 import {Button, ButtonGroup, Divider} from "@chakra-ui/react";
 import {SearchContext} from "../../context/SearchProvider";
 import {set} from "zod";
+import {useTranslation} from "react-i18next";
 
 export default function NewBuildingFilter() {
     const [pressedButton, setPressedButton] = useState("all")
-
+    const {t} = useTranslation();
     const {setNewBuilding} = useContext(SearchContext)
 
     useEffect(() => {
@@ -21,7 +22,7 @@ export default function NewBuildingFilter() {
     return (
         <ButtonGroup
             variant="contained"
-            aria-label="Тип недвижимости"
+            aria-label={t('property_type')}
             spacing={0}
             width={{base: "100%", lg: "50%"}}
             alignItems={"center"}
@@ -41,7 +42,7 @@ export default function NewBuildingFilter() {
                 backgroundColor={pressedButton === "all" ? "#2d9d92" : "#ffffff"}
                 onClick={() => setPressedButton("all")}
             >
-                Все
+                {t('all')}
             </Button>
             <Divider orientation='vertical' height="70%"/>
             <Button
@@ -56,7 +57,7 @@ export default function NewBuildingFilter() {
                 backgroundColor={pressedButton === "old" ? "#2d9d92" : "#ffffff"}
                 onClick={() => setPressedButton("old")}
             >
-                Вторичка
+                {t('secondary')}
             </Button>
             <Divider orientation='vertical' height="70%"/>
             <Button
@@ -71,7 +72,7 @@ export default function NewBuildingFilter() {
                 backgroundColor={pressedButton === "new" ? "#2d9d92" : "#ffffff"}
                 onClick={() => setPressedButton("new")}
             >
-                Новостройка
+                {t('new')}
             </Button>
         </ButtonGroup>
     );

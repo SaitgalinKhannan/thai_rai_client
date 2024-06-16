@@ -7,6 +7,7 @@ import {
 import React, {useContext, useState} from "react";
 import {ThaiRaiContext} from "../../context/HouseProvider";
 import {SearchContext} from "../../context/SearchProvider";
+import {useTranslation} from "react-i18next";
 
 export default function RoomCountFilter() {
     const isDesktop = useBreakpointValue({base: false, lg: true})
@@ -22,6 +23,8 @@ export default function RoomCountFilter() {
         setCheckedItems([false, false, false, false, false, false, false])
         setRoomItems([false, false, false, false, false, false, false])
     }
+
+    const {t} = useTranslation();
 
     return (
         <>
@@ -39,7 +42,7 @@ export default function RoomCountFilter() {
                 overflow={"hidden"}
                 _hover={{background: "#e2e8f0"}}
             >
-                Количество комнат
+                {t('room_count')}
             </Button>
             <Drawer placement={isDesktop ? "right" : "bottom"} onClose={onClose} isOpen={isOpen}>
                 <DrawerOverlay/>
@@ -51,11 +54,23 @@ export default function RoomCountFilter() {
                             justifyContent={"space-between"}
                             width={"100%"}
                         >
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"}
-                                    onClick={() => onClose()}>Закрыть</Button>
-                            <Text textAlign={"center"}>Количество комнат</Text>
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"}
-                                    onClick={() => onClear()}>Сбросить</Button>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClose()}
+                            >
+                                {t('close')}
+                            </Button>
+                            <Text textAlign={"center"}>{t('room_count')}</Text>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClear()}
+                            >
+                                {t('reset')}
+                            </Button>
                         </HStack>
                     </DrawerHeader>
                     <DrawerBody alignItems="center">
@@ -66,7 +81,7 @@ export default function RoomCountFilter() {
                                     isChecked={checkedItems[0]}
                                     onChange={(e) => setCheckedItems([e.target.checked, checkedItems[1], checkedItems[2], checkedItems[3], checkedItems[4], checkedItems[5], checkedItems[6]])}
                                 >
-                                    Студия
+                                    {t('room_0')}
                                 </Checkbox>
                                 <Checkbox
                                     colorScheme="green"
@@ -121,7 +136,7 @@ export default function RoomCountFilter() {
                             width="100%"
                             _hover={{background: "#e2e8f0"}}
                         >
-                            Применить
+                            {t('apply')}
                         </Button>
                     </DrawerBody>
                 </DrawerContent>

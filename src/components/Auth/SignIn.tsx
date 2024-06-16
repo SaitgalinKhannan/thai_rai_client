@@ -8,7 +8,6 @@ import {
     InputLeftElement,
     chakra,
     Box,
-    Link,
     FormControl,
     InputRightElement, useToast, ToastId, HStack, Text
 } from "@chakra-ui/react";
@@ -17,11 +16,13 @@ import {ViewIcon, ViewOffIcon} from "@chakra-ui/icons";
 import {authUser, userByEmail} from "../../api/Data";
 import {useNavigate} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
+import {useTranslation} from "react-i18next";
 
 const CFaUserAlt = chakra(FaUserAlt);
 const CFaLock = chakra(FaLock);
 
 const SignIn = () => {
+    const {t} = useTranslation();
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +50,7 @@ const SignIn = () => {
 
                     if (toastIdRef.current) {
                         toast.update(toastIdRef.current, {
-                            title: 'Вход выполнен',
+                            title: t('signed'),
                             status: 'success',
                             duration: 1000,
                             isClosable: true,
@@ -65,8 +66,8 @@ const SignIn = () => {
             console.log(error)
             if (toastIdRef.current) {
                 toast.update(toastIdRef.current, {
-                    title: 'Не удалось войти',
-                    description: "Неправильный логин или пароль",
+                    title: t('failed_to_login'),
+                    description: t('wrong_pass_or_login'),
                     status: 'error',
                     duration: 1000,
                     isClosable: true,
@@ -79,7 +80,7 @@ const SignIn = () => {
     const loginButtonHandle = async () => {
         if (email.trim() === '') {
             toast({
-                title: 'Введите логин!',
+                title: t('enter_login'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -90,7 +91,7 @@ const SignIn = () => {
 
         if (password.trim() === '') {
             toast({
-                title: 'Введите пароль!',
+                title: t('enter_pass'),
                 status: 'error',
                 duration: 500,
                 isClosable: true,
@@ -100,7 +101,7 @@ const SignIn = () => {
         }
 
         toastIdRef.current = toast({
-            title: 'Загрузка',
+            title: t('loading'),
             status: 'loading',
             isClosable: true,
             position: 'top'
@@ -154,7 +155,7 @@ const SignIn = () => {
                                     </InputLeftElement>
                                     <Input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Пароль"
+                                        placeholder={t('password')}
                                         value={password}
                                         onChange={it => setPassword(it.target.value)}
                                     />
@@ -178,20 +179,20 @@ const SignIn = () => {
                                 onClick={loginButtonHandle}
                                 _hover={{background: "#9cb1b1"}}
                             >
-                                Войти
+                                {t('enter')}
                             </Button>
                         </Stack>
                     </form>
                 </Box>
             </Stack>
             <HStack spacing={0}>
-                <Text>Нет аккаунта?{" "}</Text>
+                <Text>{t('no_account')}?{" "}</Text>
                 <Button
                     variant={"text"}
                     color={"#2d9d92"}
                     onClick={() => navigate("/new-account")}
                 >
-                    Регистрация
+                    {t('sign_up')}
                 </Button>
             </HStack>
         </Flex>

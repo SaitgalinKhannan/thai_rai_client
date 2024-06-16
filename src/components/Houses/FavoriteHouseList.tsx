@@ -6,8 +6,10 @@ import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {RealEstateInterface} from "../../api/model";
 import {favoritesHousesList} from "../../api/Data";
+import {useTranslation} from "react-i18next";
 
 export const FavoriteHouseList = () => {
+    const {t} = useTranslation();
     const [houses, setHouses] = useState<RealEstateInterface[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [offset, setOffset] = useState(0);
@@ -70,7 +72,7 @@ export const FavoriteHouseList = () => {
             <>
                 <Center>
                     <Heading size="lg" p={{base: '6', lg: '10'}} text-align="center" color={"#2d9d92"}>
-                        Ничего нет...
+                        {t('nothing')}
                     </Heading>
                 </Center>
 
@@ -80,7 +82,7 @@ export const FavoriteHouseList = () => {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Предыдущая страница"
+                        aria-label={t('prev_page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -96,7 +98,7 @@ export const FavoriteHouseList = () => {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Следующая страница"
+                        aria-label={t('page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -111,7 +113,7 @@ export const FavoriteHouseList = () => {
                         backgroundColor="white"
                         textColor={"rgba(0, 0, 0, 1)"}
                         fontWeight="normal"
-                        aria-label="Следующая страница"
+                        aria-label={t('next_page')}
                         minW="44px"
                         width="44px"
                         height="44px"
@@ -156,7 +158,7 @@ export const FavoriteHouseList = () => {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Предыдущая страница"
+                    aria-label={t('prev_page')}
                     minW="44px"
                     width="44px"
                     height="44px"
@@ -173,7 +175,7 @@ export const FavoriteHouseList = () => {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Следующая страница"
+                    aria-label={t('page')}
                     minW="44px"
                     width="44px"
                     height="44px"
@@ -189,7 +191,7 @@ export const FavoriteHouseList = () => {
                     backgroundColor="white"
                     textColor={"rgba(0, 0, 0, 1)"}
                     fontWeight="normal"
-                    aria-label="Следующая страница"
+                    aria-label={t('next_page')}
                     minW="44px"
                     width="44px"
                     height="44px"

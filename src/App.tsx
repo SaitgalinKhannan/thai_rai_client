@@ -36,7 +36,7 @@ const AppLayout = () => {
             {!isMobile && (
                 <Header/>
             )}
-            <Container maxW={{base: '100%', lg: '70%'}} marginBottom="50px" padding={0}>
+            <Container maxW={{base: '100%', lg: '90%', xl: "70%"}} marginBottom="50px" padding={0}>
                 <Outlet/>
             </Container>
             {isMobile && (

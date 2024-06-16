@@ -11,14 +11,16 @@ import {
     useDisclosure
 } from "@chakra-ui/react";
 import {SearchContext} from "../../context/SearchProvider";
+import {useTranslation} from "react-i18next";
 
 export default function AreaFilter() {
+    const {t} = useTranslation();
     const isDesktop = useBreakpointValue({base: false, lg: true})
     const {areaFrom, setAreaFrom, areaTo, setAreaTo} = useContext(SearchContext)
     const {isOpen, onOpen, onClose} = useDisclosure()
     const [localAreaFrom, setLocalAreaFrom] = useState<number | null>(areaFrom)
     const [localAreaTo, setLocalAreaTo] = useState<number | null>(areaTo)
-    const [buttonText, setButtonText] = useState("Площадь")
+    const [buttonText, setButtonText] = useState(t('area'))
 
     useEffect(() => {
         setLocalAreaFrom(areaFrom)
@@ -29,13 +31,13 @@ export default function AreaFilter() {
         setAreaFrom(localAreaFrom)
         setAreaTo(localAreaTo)
         if (localAreaTo == null && localAreaFrom != null) {
-            setButtonText(`от ${localAreaFrom} м²`)
+            setButtonText(`${t('from')} ${localAreaFrom} м²`)
         } else if (localAreaTo != null && localAreaFrom == null) {
-            setButtonText(`до ${localAreaTo} м²`)
+            setButtonText(`${t('to')} ${localAreaTo} м²`)
         } else if (localAreaTo == null && localAreaFrom == null) {
-            setButtonText("Площадь")
+            setButtonText(t('area'))
         } else {
-            setButtonText(`от ${localAreaFrom} до ${localAreaTo} м²`)
+            setButtonText(`${t('from')} ${localAreaFrom} ${t('to')} ${localAreaTo} м²`)
         }
         onClose();
     }
@@ -45,7 +47,7 @@ export default function AreaFilter() {
         setLocalAreaTo(null)
         setAreaTo(null)
         setAreaFrom(null)
-        setButtonText("Площадь")
+        setButtonText(t('area'))
     }
 
     function localAreaFromInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,9 +87,23 @@ export default function AreaFilter() {
                             justifyContent={"space-between"}
                             width={"100%"}
                         >
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"} onClick={() => onClose()}>Закрыть</Button>
-                            <Text>Площадь</Text>
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"} onClick={() => onClear()}>Сбросить</Button>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClose()}
+                            >
+                                {t('close')}
+                            </Button>
+                            <Text>{t('area')}</Text>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClear()}
+                            >
+                                {t('reset')}
+                            </Button>
                         </HStack>
                     </DrawerHeader>
                     <DrawerBody alignItems="center">
@@ -95,7 +111,7 @@ export default function AreaFilter() {
                             <InputGroup>
                                 <Input
                                     type="number"
-                                    placeholder="от"
+                                    placeholder={t('from')}
                                     value={localAreaFrom ?? ""}
                                     onChange={e => localAreaFromInputHandler(e)}
                                 />
@@ -103,7 +119,7 @@ export default function AreaFilter() {
                             <InputGroup>
                                 <Input
                                     type="number"
-                                    placeholder="до"
+                                    placeholder={t('to')}
                                     value={localAreaTo ?? ""}
                                     onChange={e => localAreaToInputHandler(e)}
                                 />
@@ -118,7 +134,7 @@ export default function AreaFilter() {
                             width="100%"
                             _hover={{background: "#e2e8f0"}}
                         >
-                            Применить
+                            {t('apply')}
                         </Button>
                     </DrawerBody>
                 </DrawerContent>

@@ -39,6 +39,7 @@ export default function HouseProvider({children}: Readonly<{
             offset: offset * limit
         }, null).then(data => {
             setHouses(data)
+            console.log(data)
         }).catch(e => {
             console.error('Error fetching data:', e);
         })
@@ -46,26 +47,32 @@ export default function HouseProvider({children}: Readonly<{
     };
 
     useEffect(() => {
-        housesList({
-            limit: limit,
-            offset: offset * limit
-        }, null).then(data => {
-            setHouses(data)
-        }).catch(e => {
-            console.error('Error fetching data:', e);
-        })
+        if (offset !== 0) {
+            housesList({
+                limit: limit,
+                offset: offset * limit
+            }, null).then(data => {
+                setHouses(data)
+                console.log(data)
+            }).catch(e => {
+                console.error('Error fetching data:', e);
+            })
+        }
     }, [offset]);
 
     useEffect(() => {
         setOffset(0)
-        housesList({
-            limit: limit,
-            offset: offset * limit
-        }, filter).then(data => {
-            setHouses(data)
-        }).catch(e => {
-            console.error('Error fetching data:', e);
-        })
+        if (filter) {
+            housesList({
+                limit: limit,
+                offset: offset * limit
+            }, filter).then(data => {
+                setHouses(data)
+                console.log(data)
+            }).catch(e => {
+                console.error('Error fetching data:', e);
+            })
+        }
     }, [filter]);
 
     const reauthUser = async () => {

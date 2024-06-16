@@ -6,14 +6,16 @@ import {
 } from "@chakra-ui/react";
 import React, {useContext, useEffect, useState} from "react";
 import {SearchContext} from "../../context/SearchProvider";
+import {useTranslation} from "react-i18next";
 
 export default function PriceFilter() {
+    const {t} = useTranslation();
     const isDesktop = useBreakpointValue({base: false, lg: true})
     const {priceFrom, setPriceFrom, priceTo, setPriceTo} = useContext(SearchContext)
     const {isOpen, onOpen, onClose} = useDisclosure()
     const [localPriceFrom, setLocalPriceFrom] = useState<number | null>(priceFrom)
     const [localPriceTo, setLocalPriceTo] = useState<number | null>(priceTo)
-    const [buttonText, setButtonText] = useState("Цена")
+    const [buttonText, setButtonText] = useState(t('price'))
 
     useEffect(() => {
         setLocalPriceFrom(priceFrom)
@@ -24,13 +26,13 @@ export default function PriceFilter() {
         setPriceFrom(localPriceFrom)
         setPriceTo(localPriceTo)
         if (localPriceTo == null && localPriceFrom != null) {
-            setButtonText(`от ${localPriceFrom}`)
+            setButtonText(`${t('from')} ${localPriceFrom}`)
         } else if (localPriceTo != null && localPriceFrom == null) {
-            setButtonText(`до ${localPriceTo}`)
+            setButtonText(`${t('to')} ${localPriceTo}`)
         } else if (localPriceTo == null && localPriceFrom == null) {
-            setButtonText("Цена")
+            setButtonText(t('price'))
         } else {
-            setButtonText(`от ${localPriceFrom} до ${localPriceTo}`)
+            setButtonText(`${t('from')} ${localPriceFrom} ${t('to')} ${localPriceTo}`)
         }
         onClose();
     }
@@ -40,7 +42,7 @@ export default function PriceFilter() {
         setLocalPriceTo(null)
         setPriceFrom(null)
         setPriceTo(null)
-        setButtonText("Цена")
+        setButtonText(t('price'))
     }
 
     function localPriceFromInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
@@ -79,11 +81,23 @@ export default function PriceFilter() {
                             justifyContent={"space-between"}
                             width={"100%"}
                         >
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"}
-                                    onClick={() => onClose()}>Закрыть</Button>
-                            <Text>Цена</Text>
-                            <Button alignSelf="" variant='ghost' textColor={"#2d9d92"}
-                                    onClick={() => onClear()}>Сбросить</Button>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClose()}
+                            >
+                                {t('close')}
+                            </Button>
+                            <Text>{t('price')}</Text>
+                            <Button
+                                alignSelf=""
+                                variant='ghost'
+                                textColor={"#2d9d92"}
+                                onClick={() => onClear()}
+                            >
+                                {t('reset')}
+                            </Button>
                         </HStack>
                     </DrawerHeader>
                     <DrawerBody alignItems="center">
@@ -91,7 +105,7 @@ export default function PriceFilter() {
                             <InputGroup>
                                 <Input
                                     type="number"
-                                    placeholder="от"
+                                    placeholder={t('from')}
                                     value={localPriceFrom ?? ""}
                                     onChange={e => localPriceFromInputHandler(e)}
                                 />
@@ -99,7 +113,7 @@ export default function PriceFilter() {
                             <InputGroup>
                                 <Input
                                     type="number"
-                                    placeholder="до"
+                                    placeholder={t('to')}
                                     value={localPriceTo ?? ""}
                                     onChange={e => localPriceToInputHandler(e)}
                                 />
@@ -114,7 +128,7 @@ export default function PriceFilter() {
                             width="100%"
                             _hover={{background: "#e2e8f0"}}
                         >
-                            Применить
+                            {t('apply')}
                         </Button>
                     </DrawerBody>
                 </DrawerContent>

@@ -2,7 +2,14 @@ import React, {useContext, useEffect, useRef, useState} from 'react';
 import {TextInput} from './TextInput';
 import {Avatar, Box, IconButton, Paper} from "@mui/material";
 import {ChatContext, ChatMessageDto} from "../../context/ChatProvider";
-import {MessageLeft, MessageRight} from "./Message";
+import {
+    ContextMenu,
+    MessageLeft,
+    MessageRight,
+    MobileContextMenu,
+    MobileMessageLeft,
+    MobileMessageRight
+} from "./Message";
 import {isMobileScreen} from "../../App";
 import {ArrowBackIcon} from "@chakra-ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
@@ -18,15 +25,29 @@ import profile from "../../assets/images/agents/profile.png";
 import {ZonedDateTime} from "@js-joda/core";
 import {flushSync} from "react-dom";
 import {ChatRoomDto} from "./ChatRoom";
+import useContextMenu from "../../context/useContextMenu";
+import {useToast} from "@chakra-ui/react";
 
 export default function Messages() {
     const {chatId} = useParams();
     const navigate = useNavigate();
     const listRef = useRef<HTMLUListElement | null>(null);
     const {chatRoom, chatRooms, setChatRoom, chatMessages, setChatMessages} = useContext(ChatContext);
-    const [isMobile, setIsMobile] = useState(false)
-    const [userId, setUserId] = useState<number | null>(null)
-    const [connected, setConnected] = useState<boolean>(false)
+    const [isMobile, setIsMobile] = useState(false);
+    const [userId, setUserId] = useState<number | null>(null);
+    const [connected, setConnected] = useState<boolean>(false);
+    const toast = useToast();
+
+    const {
+        clicked,
+        setClicked,
+        points,
+        setPoints,
+        message,
+        setMessage,
+        isMessageLeft,
+        setIsMessageLeft
+    } = useContextMenu();
 
     const backToChats = () => {
         setChatRoom(null)
@@ -40,11 +61,15 @@ export default function Messages() {
     };
 
     const onConnected = () => {
-        setConnected(true)
-        stompClient.subscribe(
-            "/user/" + chatRoom?.sender.id + "/queue/messages",
-            onMessageReceived
-        );
+        try {
+            stompClient.subscribe(
+                "/user/" + chatRoom?.sender.id + "/queue/messages",
+                onMessageReceived
+            )
+            setConnected(true)
+        } catch (e) {
+            console.error(e)
+        }
     };
 
     const onError = (err: string | Frame) => {
@@ -56,15 +81,18 @@ export default function Messages() {
 
         findChatMessage(notification.messageId).then((message) => {
             flushSync(() => addMessageToChat(message))
-
-            listRef.current?.lastElementChild?.scrollIntoView();
         }).catch(e => console.log(e));
     };
+
+    useEffect(() => {
+        listRef.current?.lastElementChild?.scrollIntoView();
+    }, [chatMessages]);
 
     const sendMessage = (msg: string) => {
         if (msg.trim() !== "" && chatId && chatRoom) {
             const message: ChatMessageDto = {
-                id: 0,
+                id: "",
+                relatedMessageId: "",
                 chatId: chatId,
                 sender: chatRoom.sender,
                 recipient: chatRoom.recipient,
@@ -88,6 +116,10 @@ export default function Messages() {
 
     const addMessagesToChat = (newMessages: ChatMessageDto[]) => {
         setChatMessages(prevMessages => [...prevMessages, ...newMessages]);
+    }
+
+    async function copyTextToClipboard(text: string) {
+        await navigator.clipboard.writeText(text)
     }
 
     useEffect(() => {
@@ -161,7 +193,7 @@ export default function Messages() {
         }
 
         return () => {
-            if (chatRoom !== null && !connected) {
+            if (chatRoom !== null) {
                 try {
                     stompClient.disconnect(() => {
                         console.log('disconnected')
@@ -172,6 +204,12 @@ export default function Messages() {
             }
         };
     }, [chatRoom]);
+
+    useEffect(() => {
+        if (clicked && message !== null) {
+            console.log(`${clicked} ${message.id} ${message.relatedMessageId}`)
+        }
+    }, [clicked, message]);
 
     return (
         <Box
@@ -244,26 +282,54 @@ export default function Messages() {
                 >
                     {chatMessages.map((msg) => (
                         msg.sender.id === userId ? (
-                            <MessageRight
+                            <MobileMessageRight
                                 key={msg.id}
-                                id={msg.id}
-                                chatId={msg.chatId}
-                                sender={msg.sender}
-                                recipient={msg.recipient}
-                                content={msg.content}
-                                zonedDateTime={msg.zonedDateTime}
-                                status={msg.status}
+                                chatMessage={{
+                                    id: msg.id,
+                                    relatedMessageId: msg.relatedMessageId,
+                                    chatId: msg.chatId,
+                                    sender: msg.sender,
+                                    recipient: msg.recipient,
+                                    content: msg.content,
+                                    zonedDateTime: msg.zonedDateTime,
+                                    status: msg.status
+                                }}
+                                onClick={(e) => {
+                                    console.log(`x: ${e.pageX} y: ${e.pageY}`)
+                                    e.preventDefault();
+                                    setClicked(true);
+                                    setPoints({
+                                        x: e.pageX,
+                                        y: e.pageY,
+                                    });
+                                    setIsMessageLeft(false);
+                                    setMessage(msg);
+                                }}
                             />
                         ) : (
-                            <MessageLeft
+                            <MobileMessageLeft
                                 key={msg.id}
-                                id={msg.id}
-                                chatId={msg.chatId}
-                                sender={msg.sender}
-                                recipient={msg.recipient}
-                                content={msg.content}
-                                zonedDateTime={msg.zonedDateTime}
-                                status={msg.status}
+                                chatMessage={{
+                                    id: msg.id,
+                                    relatedMessageId: msg.relatedMessageId,
+                                    chatId: msg.chatId,
+                                    sender: msg.sender,
+                                    recipient: msg.recipient,
+                                    content: msg.content,
+                                    zonedDateTime: msg.zonedDateTime,
+                                    status: msg.status
+                                }}
+                                onClick={(e) => {
+                                    console.log(`x: ${e.pageX} y: ${e.pageY}`)
+                                    e.preventDefault();
+                                    setClicked(true);
+                                    setPoints({
+                                        x: e.pageX,
+                                        y: e.pageY,
+                                    });
+                                    setIsMessageLeft(true);
+                                    setMessage(msg);
+                                }}
                             />
                         )
                     ))}
@@ -272,6 +338,17 @@ export default function Messages() {
                     <TextInput onClick={sendMessage}/>
                 </Box>
             </Paper>
+            {clicked && message !== null && (
+                <MobileContextMenu
+                    message={message}
+                    isMessageLeft={isMessageLeft}
+                    top={points.y}
+                    left={points.x}
+                    copyTextToClipboard={copyTextToClipboard}
+                    updateMessage={() => {}}
+                    deleteMessage={() => {}}
+                />
+            )}
         </Box>
     );
 }

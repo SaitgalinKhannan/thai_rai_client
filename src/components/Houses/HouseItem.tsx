@@ -3,8 +3,11 @@ import {BiArea, BiBed} from "react-icons/bi";
 import {RealEstateInterface} from "../../api/model";
 import {image} from "../../api/Data";
 import noImage from "../../assets/images/no-photo.png"
+import {useTranslation} from "react-i18next";
 
 export default function HouseItem({house}: Readonly<{ house: RealEstateInterface }>) {
+    const {t} = useTranslation();
+
     return (
         <Flex justify='center' align='center'>
             <Stack justify='center' width="350px" bg="white" boxShadow="xl" borderRadius="xl">
@@ -33,12 +36,12 @@ export default function HouseItem({house}: Readonly<{ house: RealEstateInterface
                         <HStack>
                             <BiBed style={{color: "#2d9d92"}}/>
                             <Text
-                                fontSize="12px">{house.roomCount} {house.roomCount === 1 ? "Комната" : "Комнат"}</Text>
+                                fontSize="12px">{house.roomCount} {house.roomCount === 1 ? t('room') : t('rooms')}</Text>
                         </HStack>
 
                         <HStack>
                             <BiArea style={{color: "#2d9d92"}}/>
-                            <Text fontSize="12px">{house.area} кв/м</Text>
+                            <Text fontSize="12px">{house.area} {t('sq/m')}</Text>
                         </HStack>
                     </HStack>
 
